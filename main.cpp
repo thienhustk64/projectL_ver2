@@ -2,8 +2,14 @@
 #include <SDL2/SDL_image.h>
 #include "CommonFunc.h"
 #include "BaseObject.h"
+#include "GameMap.h"
 
 BaseObject g_background;
+GameMap game_map;
+static SDL_Window *g_window = NULL;
+static SDL_Renderer *g_screen = NULL;
+static SDL_Event g_event;
+
 
 bool InitData(){
     bool success = true;
@@ -57,6 +63,9 @@ int main( int argc, char *argv[]){
     if( LoadBackground() == false){
         return -1;
     }
+
+    game_map.LoadMap( "data//map.dat");
+
     bool is_quit = false;
     while( !is_quit){
         while( SDL_PollEvent( &g_event) != 0){
