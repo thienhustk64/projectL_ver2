@@ -3,13 +3,14 @@
 #include "CommonFunc.h"
 #include "BaseObject.h"
 #include "GameMap.h"
+#include "PlayerAgent.h"
 
 BaseObject g_background;
 GameMap game_map;
 static SDL_Window *g_window = NULL;
 static SDL_Renderer *g_screen = NULL;
 static SDL_Event g_event;
-
+char tileMap[] = "data//map.dat";
 
 bool InitData(){
     bool success = true;
@@ -64,7 +65,14 @@ int main( int argc, char *argv[]){
         return -1;
     }
 
-    game_map.LoadMap( "data//map.dat");
+    game_map.LoadMap( tileMap);
+
+    PlayerAgent player;
+    player.initialize("data/ryu/ryu.xml", "data/ryu/moves.xml", true);
+
+    PlayerAgent player2;
+    player2.initialize("data/ryu/ryu.xml","data/ryu/moves.xml",  false);
+
 
     bool is_quit = false;
     while( !is_quit){
