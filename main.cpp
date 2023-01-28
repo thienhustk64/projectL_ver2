@@ -3,7 +3,7 @@
 #include "CommonFunc.h"
 #include "BaseObject.h"
 #include "GameMap.h"
-#include "PlayerAgent.h"
+#include "Player.h"
 
 BaseObject g_background;
 GameMap game_map;
@@ -67,11 +67,11 @@ int main( int argc, char *argv[]){
 
     game_map.LoadMap( tileMap);
 
-    PlayerAgent player;
-    player.initialize("data/ryu/ryu.xml", "data/ryu/moves.xml", true);
+    Player player1;
+    player1.initialize("data/ryu/ryu.xml", true, 0, 0);
 
-    PlayerAgent player2;
-    player2.initialize("data/ryu/ryu.xml","data/ryu/moves.xml",  false);
+    // Player player2;
+    // player2.initialize("data/ryu/ryu.xml","data/ryu/moves.xml",  false);
 
 
     bool is_quit = false;
@@ -86,7 +86,7 @@ int main( int argc, char *argv[]){
         SDL_RenderClear( g_screen);
 
         g_background.RenderMap( g_screen, NULL);
-
+        player1.draw( g_screen);
         SDL_RenderPresent( g_screen);
     }
 

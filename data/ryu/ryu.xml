@@ -2,7 +2,7 @@
 <character>
    <name>ryu</name>
    <type>player</type>
-   <position x_pos="0" y_pos = "30" alpha="1.0" scale="1"/>
+   <position x_pos="0" y_pos = "30" alpha="1.0" scale="3.2"/>
    <action name="start"          trigger="NONE" from="start" to="idle"/>
    <action name="idle"           trigger="NONE" from="start" to="idle"/>
    <action name="turn"           trigger="INVERT" from="idle,walk_back,walk_forward" to="idle"/>
