@@ -60,11 +60,12 @@ bool Animation::draw( SDL_Renderer* screen, int x_pos, int y_pos, float scale){
     int height = int( heights[current]*scale);
     SDL_Rect renderquad = { x_pos, y_pos, width, height};
     SDL_RenderCopy( screen, new_texture, NULL, &renderquad);
-    current_delay++;
-    if( current_delay >= delays[current]){
-        current_delay = 0;
-        current++;
-    }
+    // current_delay++;
+    // if( current_delay >= delays[current]){
+    //     current_delay = 0;
+    //     current++;
+    // }
+    current++;
     if( current >= int( paths.size())){
         current = 0;
         return true;

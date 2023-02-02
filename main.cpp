@@ -58,6 +58,8 @@ void close(){
 }
 
 int main( int argc, char *argv[]){
+    Uint32 start;
+
     if( InitData() == false){
         return -1;
     }
@@ -76,6 +78,7 @@ int main( int argc, char *argv[]){
 
     bool is_quit = false;
     while( !is_quit){
+        start = SDL_GetTicks();
         while( SDL_PollEvent( &g_event) != 0){
             if( g_event.type == SDL_QUIT){
                 is_quit = true;
@@ -88,6 +91,9 @@ int main( int argc, char *argv[]){
         g_background.RenderMap( g_screen, NULL);
         player1.draw( g_screen);
         SDL_RenderPresent( g_screen);
+        if(1000/FPS > SDL_GetTicks()-start) {
+            SDL_Delay(1000/FPS-(SDL_GetTicks()-start));
+        }
     }
 
     close();
