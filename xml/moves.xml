@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<moves>
+   <move trigger="U"  keys="U"/>
+   <move trigger="D"  keys="D"/>
+   <move trigger="B"  keys="B"/>
+   <move trigger="F"  keys="F"/>
+   <move trigger="P"  keys="P"/>
+   <move trigger="K"  keys="K"/>
+   <move trigger="S"  keys="S"/>
+
+</moves>

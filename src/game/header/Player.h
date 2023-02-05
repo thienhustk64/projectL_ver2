@@ -18,6 +18,10 @@ class Player{
         int y_pos;
         float alpha;
         float scale;
+        int x_pos_skill;
+        int y_pos_skill;
+        int x_pos_skill_finish;
+        int y_pos_skill_finish;
 
         float y_initial;
         float x_initial;
@@ -27,7 +31,10 @@ class Player{
         std::string type;
         bool inverted;
         bool is_hurt;
+        bool is_skill;
+        bool is_skill_finish;
         int index;
+        int current;
 
         std::string current_state;
         std::string previous_state;
@@ -53,7 +60,8 @@ class Player{
         bool isHurt();
 
         std::map<std::string, bool> state;
-        bool initialize(std::string file_name, bool player_one, float x_pos, float y_pos);
+        bool initialize(std::string character, std::string skill, std::string skill_finish, bool player_one, float x_pos, float y_pos);
+        void updateState( std::string trigger);
         void draw( SDL_Renderer* screen);
     };
 

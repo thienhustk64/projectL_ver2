@@ -4,6 +4,7 @@
 #include "BaseObject.h"
 #include "GameMap.h"
 #include "Player.h"
+#include "Input.h"
 
 BaseObject g_background;
 GameMap game_map;
@@ -59,6 +60,7 @@ void close(){
 
 int main( int argc, char *argv[]){
     Uint32 start;
+    std::string trigger;
 
     if( InitData() == false){
         return -1;
@@ -69,8 +71,10 @@ int main( int argc, char *argv[]){
 
     game_map.LoadMap( tileMap);
 
+    Input keyboard;
+
     Player player1;
-    player1.initialize("data/ryu/ryu.xml", true, 0, 0);
+    player1.initialize("xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", true, 50, 50);
 
     // Player player2;
     // player2.initialize("data/ryu/ryu.xml","data/ryu/moves.xml",  false);
@@ -79,11 +83,10 @@ int main( int argc, char *argv[]){
     bool is_quit = false;
     while( !is_quit){
         start = SDL_GetTicks();
-        while( SDL_PollEvent( &g_event) != 0){
-            if( g_event.type == SDL_QUIT){
-                is_quit = true;
-            }
-        }
+        is_quit = keyboard.getEvent( &g_event);
+        trigger = keyboard.getTrigger();
+
+        player1.updateState( trigger);
 
         SDL_SetRenderDrawColor( g_screen, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
         SDL_RenderClear( g_screen);
