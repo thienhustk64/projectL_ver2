@@ -88,7 +88,6 @@ bool Player::initialize(std::string character, std::string skill, std::string sk
         alpha_initial = position_node->FloatAttribute( "alpha");
         scale_initial = position_node->FloatAttribute( "scale");
 
-        moveXpos(x_initial);
         this->y_pos += y_initial;
         alpha = alpha_initial;
         scale = scale_initial;
@@ -127,11 +126,20 @@ bool Player::initialize(std::string character, std::string skill, std::string sk
         
         XMLElement* frame_node = animation_node->FirstChildElement("frame");
         while( frame_node != 0){
+            int y_initial_animation = 0;
             string path  = frame_node->Attribute("path");
             float width  = frame_node->IntAttribute("width");
             float height = frame_node->IntAttribute("height");
             float delay  = frame_node->FloatAttribute("delay");
-            animation->addFrame( path, width, height, delay);
+            XMLElement* move_node = frame_node->FirstChildElement("move");
+            if( move_node != 0){
+                y_initial_animation = int(move_node->FloatAttribute( "y_vel")*20);
+                std::string y_vel = move_node->Attribute( "y_vel");
+                if( y_vel.find("-") == 0 && y_initial_animation > 0){
+                    y_initial_animation = y_initial_animation*-1;
+                }
+            }
+            animation->addFrame( path, width, height, delay, y_initial_animation);
             frame_node = frame_node->NextSiblingElement("frame");
         }
         animations.insert( { name, animation});
@@ -162,7 +170,7 @@ bool Player::initialize(std::string character, std::string skill, std::string sk
             float width  = frame_node->IntAttribute("width");
             float height = frame_node->IntAttribute("height");
             float delay  = frame_node->FloatAttribute("delay");
-            animation->addFrame( path, width, height, delay);
+            animation->addFrame( path, width, height, delay, 0);
             frame_node = frame_node->NextSiblingElement("frame");
         }
         animations.insert( { name, animation});
@@ -178,7 +186,7 @@ bool Player::initialize(std::string character, std::string skill, std::string sk
     XMLElement* position_node_finish = character_node_finish->FirstChildElement("position");
     if( position_node_finish != 0){
         x_pos_finish = position_node_finish->IntAttribute("x_pos");
-        y_pos_finish = -32;
+        y_pos_finish = position_node_finish->IntAttribute("y_pos")*-1;
     }
     XMLElement* animation_node_finish = character_node_finish->FirstChildElement("animation");
     if( animation_node_finish != 0){
@@ -191,7 +199,7 @@ bool Player::initialize(std::string character, std::string skill, std::string sk
             float width  = frame_node->IntAttribute("width");
             float height = frame_node->IntAttribute("height");
             float delay  = frame_node->FloatAttribute("delay");
-            animation->addFrame( path, width, height, delay);
+            animation->addFrame( path, width, height, delay, 0);
             frame_node = frame_node->NextSiblingElement("frame");
         }
         animations.insert( { name, animation});
@@ -200,17 +208,23 @@ bool Player::initialize(std::string character, std::string skill, std::string sk
     return true;
 }
 
-void Player::moveXpos(float value)
-{
+void Player::moveXpos( bool forward)
+{   
+    int move;
+    if( forward){
+        move = x_initial;
+    }else{
+        move = x_initial*(-1);
+    }
     if(inverted)
-        x_pos -= value;
+        x_pos -= move;
     else
-        x_pos += value;
+        x_pos += move;
 }
 
 void Player::draw( SDL_Renderer* screen){
     current++;
-    bool change_state = animations[current_state]->draw( screen, x_pos, y_pos, scale);
+    bool change_state = animations[current_state]->draw( screen, x_pos, y_pos, scale, inverted);
     std::string state_predict;
     if( change_state){
         if( current_state.compare("fireball") == 0){
@@ -229,7 +243,7 @@ void Player::draw( SDL_Renderer* screen){
     }
 
     if( is_skill){
-        bool skill = animations["skill"]->draw( screen, x_pos_skill, y_pos_skill, scale);
+        bool skill = animations["skill"]->draw( screen, x_pos_skill, y_pos_skill, scale, inverted);
         if( skill){
             is_skill = false;
             is_skill_finish = true;
@@ -238,7 +252,7 @@ void Player::draw( SDL_Renderer* screen){
         }
     }
     if( is_skill_finish){
-        bool finish_skill = animations["skill_finish"]->draw( screen, x_pos_skill_finish, y_pos_skill_finish, scale);
+        bool finish_skill = animations["skill_finish"]->draw( screen, x_pos_skill_finish, y_pos_skill_finish, scale, inverted);
         if( finish_skill){
             is_skill_finish = false;
         }
@@ -251,5 +265,28 @@ void Player::updateState( std::string trigger){
         previous_state = current_state;
         current_state = states[ current_state][trigger];
     }
-    
+}
+
+
+void Player::DoPlayer(){
+    if( current_state.compare("walk_forward") == 0 || current_state.compare("jump_forward") == 0){
+        moveXpos( true);
+    }
+    if( current_state.compare("walk_back") == 0 || current_state.compare("jump_back") == 0){
+        moveXpos( false);
+    }
+
+    if( current_state.find( "jump") == 0){
+        y_pos = y_pos - animations[current_state]->getYInitial();
+    }else{
+        if( y_pos + int(animations[current_state]->getHeight()*scale) < GROUND ){
+            y_pos += y_initial;
+        }
+    }
+    // printf("%d\n", x_pos);
+    if( x_pos < 0){
+        x_pos = 0;
+    }else if( x_pos > SCREEN_WIDTH){
+        x_pos = SCREEN_WIDTH;
+    }
 }

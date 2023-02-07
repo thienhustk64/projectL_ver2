@@ -26,7 +26,7 @@ Input::~Input(){
 
 }
 
-bool Input::getEvent( SDL_Event *windowEvent){
+bool Input::getEvent( SDL_Event *windowEvent, bool inverted){
     bool done = false;
     while( SDL_PollEvent( windowEvent)){
         switch( windowEvent->type){
@@ -60,11 +60,19 @@ bool Input::getEvent( SDL_Event *windowEvent){
     }
 
     if( state[keys[B]]){
-        keyPress[B] = true;
+        if( inverted){
+            keyPress[F] = true;
+        }else{
+            keyPress[B] = true;
+        }
     }
     
     if( state[keys[F]]){
-        keyPress[F] = true;
+        if( inverted){
+            keyPress[B] = true;
+        }else{
+            keyPress[F] = true;
+        }
     }
 
     if( state[keys[P]]){

@@ -11,6 +11,8 @@ const int SCREEN_WIDTH = 960;
 const int SCREEN_HEIGHT = 640;
 const int SCREEN_BPP = 32;
 const int FPS = 15;
+const int GROUND = 550;
+const int SCALE = 20;
 
 const int COLOR_KEY_R = 167;
 const int COLOR_KEY_G = 175;

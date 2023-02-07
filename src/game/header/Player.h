@@ -55,7 +55,7 @@ class Player{
 
         bool operator< (const Player& p) const;
         float getXpos();
-        void moveXpos(float value);
+        void moveXpos(bool forward);
         bool isInverted();
         bool isHurt();
 
@@ -63,6 +63,7 @@ class Player{
         bool initialize(std::string character, std::string skill, std::string skill_finish, bool player_one, float x_pos, float y_pos);
         void updateState( std::string trigger);
         void draw( SDL_Renderer* screen);
+        void DoPlayer();
     };
 
 #endif

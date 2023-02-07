@@ -2,12 +2,10 @@
 #include <SDL2/SDL_image.h>
 #include "CommonFunc.h"
 #include "BaseObject.h"
-#include "GameMap.h"
 #include "Player.h"
 #include "Input.h"
 
 BaseObject g_background;
-GameMap game_map;
 static SDL_Window *g_window = NULL;
 static SDL_Renderer *g_screen = NULL;
 static SDL_Event g_event;
@@ -69,21 +67,19 @@ int main( int argc, char *argv[]){
         return -1;
     }
 
-    game_map.LoadMap( tileMap);
-
     Input keyboard;
 
     Player player1;
-    player1.initialize("xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", true, 50, 50);
+    player1.initialize("xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", true, 50, 200);
 
-    // Player player2;
-    // player2.initialize("data/ryu/ryu.xml","data/ryu/moves.xml",  false);
+    Player player2;
+    player2.initialize("xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", false, 800, 200);
 
 
     bool is_quit = false;
     while( !is_quit){
         start = SDL_GetTicks();
-        is_quit = keyboard.getEvent( &g_event);
+        is_quit = keyboard.getEvent( &g_event, player1.isInverted());
         trigger = keyboard.getTrigger();
 
         player1.updateState( trigger);
@@ -92,7 +88,11 @@ int main( int argc, char *argv[]){
         SDL_RenderClear( g_screen);
 
         g_background.RenderMap( g_screen, NULL);
+        player1.DoPlayer();
         player1.draw( g_screen);
+
+        player2.DoPlayer();
+        player2.draw( g_screen);
         SDL_RenderPresent( g_screen);
         if(1000/FPS > SDL_GetTicks()-start) {
             SDL_Delay(1000/FPS-(SDL_GetTicks()-start));

@@ -36,7 +36,15 @@
         "system_error": "c",
         "tuple": "c",
         "utility": "c",
-        "cstring": "c"
+        "cstring": "c",
+        "algorithm": "cpp",
+        "cerrno": "cpp",
+        "climits": "cpp",
+        "map": "cpp",
+        "ios": "cpp",
+        "queue": "cpp",
+        "string": "cpp",
+        "random": "cpp"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
     "C_Cpp.errorSquiggles": "disabled"

@@ -48,23 +48,24 @@ Animation::~Animation(){
     // }
 }
 
-void Animation::addFrame( string file_name, float w, float h, int delay){
+void Animation::addFrame( string file_name, float w, float h, int delay, int y_initial){
     paths.push_back( file_name);
     widths.push_back( w);
     heights.push_back( h);
     delays.push_back( delay);
+    y_initials.push_back( y_initial);
 }
 
 void Animation::setXPos( int x_pos){
     this->x_pos = x_pos;
 }
 
-int Animation::getHeight( int index){
-    return heights[index];
+int Animation::getHeight(){
+    return heights[current];
 }
 
-int Animation::getWidth( int index){
-    return widths[index];
+int Animation::getWidth(){
+    return widths[current];
 }
 
 int Animation::getXFinish(){
@@ -75,27 +76,43 @@ int Animation::getYFinish(){
     return y_finish;
 }
 
-string Animation::getPath( int index){
-    return paths[index];
+int Animation::getXPos(){
+    return x_pos;
 }
 
-bool Animation::draw( SDL_Renderer* screen, int x_pos_character, int y_pos_character, float scale){
+int Animation::getYInitial(){
+    return y_initials[current];
+}
+
+string Animation::getPath(){
+    return paths[current];
+}
+
+bool Animation::draw( SDL_Renderer* screen, int x_pos_character, int y_pos_character, float scale, bool inverted){
     SDL_Surface* load_surface = IMG_Load( paths[current].c_str());
     SDL_Texture* new_texture = SDL_CreateTextureFromSurface( screen, load_surface);
+    SDL_FreeSurface( load_surface);
     int width = int( widths[current]*scale);
     int height = int( heights[current]*scale);
-    x_finish = x_pos_character + x_pos + x_initial*current;
-    y_finish = y_pos_character + y_pos;
-    SDL_Rect renderquad = { x_pos_character + x_pos + x_initial*current, y_pos_character + y_pos, width, height};
-    SDL_RenderCopy( screen, new_texture, NULL, &renderquad);
-    // current_delay++;
-    // if( current_delay >= delays[current]){
-    //     current_delay = 0;
-    //     current++;
-    // }
+    
+
+    
+    // SDL_RenderCopy( screen, new_texture, NULL, &renderquad);
+    if( inverted){
+        x_finish = x_pos_character - int(x_pos*scale) + x_initial*current*-1;
+        y_finish = y_pos_character + int(y_pos*scale);
+        SDL_Rect renderquad = { x_finish-width, y_finish, width, height};
+        SDL_RenderCopyEx( screen, new_texture, NULL, &renderquad, 0, NULL, SDL_FLIP_HORIZONTAL);
+    }else{
+        x_finish = x_pos_character + int(x_pos*scale) + x_initial*current;
+        y_finish = y_pos_character + int(y_pos*scale);
+        SDL_Rect renderquad = { x_finish, y_finish, width, height};
+        SDL_RenderCopyEx( screen, new_texture, NULL, &renderquad, 0, NULL, SDL_FLIP_NONE);
+    }
+    SDL_DestroyTexture( new_texture);
+
     current++;
     if( current >= int( paths.size())){
-        // printf("%s\t%d\n",paths[current-1].c_str(), current);
         current = 0;
         return true;
     }

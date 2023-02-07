@@ -2,7 +2,7 @@
 <character>
    <name>fireball</name>
    <type>projectile</type>
-   <position x_pos="15" y_pos="5" alpha="0.9" scale="1"/>
+   <position x_pos="30" y_pos="2" alpha="0.9" scale="1"/>
    <action name="start" trigger="NONE" from="start" to="start" continual="true"/>
    <animation name="start">
       <frame path="data/fireball/fireball00.png" width="40" height="20" delay="20">

@@ -29,7 +29,7 @@ class Input{
     public:
         Input();
         ~Input();
-        bool getEvent( SDL_Event *windowEvent);
+        bool getEvent( SDL_Event *windowEvent, bool inverted);
         std::string getTrigger();
 };
 
