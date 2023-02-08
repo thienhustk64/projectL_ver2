@@ -8,7 +8,7 @@
    <action name="walk_back"      trigger="B" from="idle" to="idle"/>
    <action name="walk_forward"   trigger="F" from="idle" to="idle"/>
    <action name="start_duck"     trigger="DB,D" from="idle,walk_back,walk_forward" to="duck"/>
-   <action name="end_duck"       trigger="NONE,~D" from="duck,duck_back" to="idle"/>
+   <action name="end_duck"       trigger="NONE" from="duck,duck_back" to="idle"/>
    <action name="duck"           trigger="D" from="duck_back" to="duck"/>
    <action name="duck_back"      trigger="DB" from="duck" to="duck"/>
    <action name="duck_punch"     trigger="DP" from="duck,duck_back" to="previous"/>

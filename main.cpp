@@ -4,6 +4,7 @@
 #include "BaseObject.h"
 #include "Player.h"
 #include "Input.h"
+#include "Client.c"
 
 BaseObject g_background;
 static SDL_Window *g_window = NULL;
@@ -79,10 +80,20 @@ int main( int argc, char *argv[]){
     bool is_quit = false;
     while( !is_quit){
         start = SDL_GetTicks();
+        // Xem tk player có out
         is_quit = keyboard.getEvent( &g_event, player1.isInverted());
-        trigger = keyboard.getTrigger();
+        // Trigger client
 
+        trigger = keyboard.getTrigger();
+        // Gửi lên cho server
         player1.updateState( trigger);
+        /*
+            Nhận được trigger từ tk server nhận cả 2 trigger -> trigger1 trigger2
+            player1.updateState( trigger1);
+            player2.updateState( trigger2);
+        */
+
+        
 
         SDL_SetRenderDrawColor( g_screen, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
         SDL_RenderClear( g_screen);
