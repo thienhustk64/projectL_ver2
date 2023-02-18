@@ -1,15 +1,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "CommonFunc.h"
+#include "GameMap.h"
 #include "BaseObject.h"
-#include "Player.h"
-#include "Input.h"
-#include "Client.c"
+#include "menu.h"
 
-BaseObject g_background;
-static SDL_Window *g_window = NULL;
-static SDL_Renderer *g_screen = NULL;
-static SDL_Event g_event;
 char tileMap[] = "data//map.dat";
 
 bool InitData(){
@@ -41,8 +36,8 @@ bool InitData(){
     return success;
 }
 
-bool LoadBackground(){
-    bool ret = g_background.LoadImg( "data//background.png", g_screen);
+bool LoadBackground( string path){
+    bool ret = g_background.LoadImg( path, g_screen);
     return ret;
 }
 
@@ -64,52 +59,11 @@ int main( int argc, char *argv[]){
     if( InitData() == false){
         return -1;
     }
-    if( LoadBackground() == false){
+    if( LoadBackground( "data//background.png") == false){
         return -1;
     }
 
-    Input keyboard;
-
-    Player player1;
-    player1.initialize("xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", true, 50, 200);
-
-    Player player2;
-    player2.initialize("xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", false, 800, 200);
-
-
     bool is_quit = false;
-    while( !is_quit){
-        start = SDL_GetTicks();
-        // Xem tk player có out
-        is_quit = keyboard.getEvent( &g_event, player1.isInverted());
-        // Trigger client
-
-        trigger = keyboard.getTrigger();
-        // Gửi lên cho server
-        player1.updateState( trigger);
-        /*
-            Nhận được trigger từ tk server nhận cả 2 trigger -> trigger1 trigger2
-            player1.updateState( trigger1);
-            player2.updateState( trigger2);
-        */
-
-        
-
-        SDL_SetRenderDrawColor( g_screen, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
-        SDL_RenderClear( g_screen);
-
-        g_background.RenderMap( g_screen, NULL);
-        player1.DoPlayer();
-        player1.draw( g_screen);
-
-        player2.DoPlayer();
-        player2.draw( g_screen);
-        SDL_RenderPresent( g_screen);
-        if(1000/FPS > SDL_GetTicks()-start) {
-            SDL_Delay(1000/FPS-(SDL_GetTicks()-start));
-        }
-    }
-
     close();
     printf("Hello");
     return 0;

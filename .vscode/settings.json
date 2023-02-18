@@ -44,7 +44,9 @@
         "ios": "cpp",
         "queue": "cpp",
         "string": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "client.c": "cpp",
+        "windows.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
     "C_Cpp.errorSquiggles": "disabled"
