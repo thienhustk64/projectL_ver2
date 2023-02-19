@@ -10,10 +10,12 @@
 #include "tinyxml2.h"
 #include "Animation.h"
 #include "CommonFunc.h"
+#include "Collision.h"
 #include "ultis.h"
 
 class Player{
     private:
+        int health;
         int x_pos;
         int y_pos;
         float alpha;
@@ -43,11 +45,6 @@ class Player{
         std::map<std::string, std::string> next_state;
         std::map<std::string, Animation*> animations;
 
-        Player *opponent;
-        
-        void setCurrentState(std::string state);
-        void checkCollisions(float action_x_vel);
-
     public:
         Player();
         Player(const Player &p);
@@ -58,12 +55,16 @@ class Player{
         void moveXpos(bool forward);
         bool isInverted();
         bool isHurt();
+        int getHealth();
 
+        std::string getTrigger();
         std::map<std::string, bool> state;
         bool initialize(std::string character, std::string skill, std::string skill_finish, bool player_one, float x_pos, float y_pos);
         void updateState( std::string trigger);
         void draw( SDL_Renderer* screen);
-        void DoPlayer();
+        void DoPlayer(bool is_collison);
+        Collision getCollision();
+        bool checkCollision( Collision temp);
     };
 
 #endif

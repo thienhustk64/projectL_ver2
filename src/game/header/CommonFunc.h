@@ -7,6 +7,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 // Screen
+
 const int SCREEN_WIDTH = 960;
 const int SCREEN_HEIGHT = 640;
 const int SCREEN_BPP = 32;

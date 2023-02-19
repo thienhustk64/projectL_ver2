@@ -5,7 +5,7 @@ using namespace std;
 
 Player::Player(){
     current_state = "idle";
-    opponent      = NULL;
+    health = 100;
     is_hurt       = false;
     index         = 0;
     current = 0;
@@ -18,6 +18,7 @@ Player::Player(const Player &p){
     y_pos = p.y_pos;
     alpha = p.alpha;
     scale = p.scale;
+    health = p.health;
 
     x_initial     = p.x_initial;
     y_initial     = p.y_initial;
@@ -37,7 +38,6 @@ Player::Player(const Player &p){
 
     states     = p.states;
     next_state = p.next_state;
-    opponent = p.opponent;
     state = p.state;
 }
 
@@ -50,6 +50,14 @@ bool Player::operator< (const Player& p) const{
 
 float Player::getXpos(){
     return x_pos;
+}
+
+string Player::getTrigger(){
+    return animations[current_state]->getTrigger();
+}
+
+int Player::getHealth(){
+    return health;
 }
 
 bool Player::isInverted(){
@@ -123,6 +131,11 @@ bool Player::initialize(std::string character, std::string skill, std::string sk
             int x_pos_animation = animation_node->FirstChildElement("position")->IntAttribute("x_pos");
             animation->setXPos( x_pos_animation);
         }
+
+        if( animation_node->FirstChildElement("trigger") != 0){
+            string trigger_value = animation_node->FirstChildElement("trigger")->Attribute( "value");
+            animation->setTrigger( trigger_value);
+        }
         
         XMLElement* frame_node = animation_node->FirstChildElement("frame");
         while( frame_node != 0){
@@ -153,6 +166,7 @@ bool Player::initialize(std::string character, std::string skill, std::string sk
     int x_pos_skill = 0;
     int y_pos_skill = 0;
     XMLElement* character_node_skill = doc.FirstChildElement( "character");
+
     XMLElement* position_node_skill = character_node_skill->FirstChildElement("position");
     if( position_node_skill != 0){
         x_initial_skill = position_node_skill->IntAttribute("x_pos");
@@ -163,7 +177,10 @@ bool Player::initialize(std::string character, std::string skill, std::string sk
     if( animation_node_skill != 0){
         string name       = "skill";
         Animation* animation = new Animation(true, true, x_pos_skill, y_pos_skill, x_initial_skill);
-        
+        if( character_node_skill->FirstChildElement("trigger") != 0){
+            string trigger_skill = character_node_skill->FirstChildElement("trigger")->Attribute( "value");
+            animation->setTrigger( trigger_skill);
+        }
         XMLElement* frame_node = animation_node_skill->FirstChildElement("frame");
         while( frame_node != 0){
             string path  = frame_node->Attribute("path");
@@ -192,7 +209,10 @@ bool Player::initialize(std::string character, std::string skill, std::string sk
     if( animation_node_finish != 0){
         string name       = "skill_finish";
         Animation* animation = new Animation(true, true, x_pos_finish, y_pos_finish, x_initial_finish);
-        
+        if( character_node_finish->FirstChildElement("trigger") != 0){
+            string trigger_finish = character_node_finish->FirstChildElement("trigger")->Attribute( "value");
+            animation->setTrigger( trigger_finish);
+        }
         XMLElement* frame_node = animation_node_finish->FirstChildElement("frame");
         while( frame_node != 0){
             string path  = frame_node->Attribute("path");
@@ -262,15 +282,27 @@ void Player::draw( SDL_Renderer* screen){
 
 void Player::updateState( std::string trigger){
     if( states.find(current_state)->second.find( trigger) != states.find(current_state)->second.end()){
-        previous_state = current_state;
-        current_state = states[ current_state][trigger];
+        if( !(current_state.compare("hurt_low") == 0 && is_hurt)){
+            previous_state = current_state;
+            current_state = states[ current_state][trigger];
+            if( current_state.compare("hurt_low") == 0){
+                is_hurt = true;
+                health = health - 5;
+            }else{
+                is_hurt = false;
+            }
+        }
+        
+        // animations[current_state]->reset();
     }
 }
 
 
-void Player::DoPlayer(){
-    if( current_state.compare("walk_forward") == 0 || current_state.compare("jump_forward") == 0){
-        moveXpos( true);
+void Player::DoPlayer( bool is_collison){
+    if(!is_collison){
+        if( current_state.compare("walk_forward") == 0 || current_state.compare("jump_forward") == 0){
+            moveXpos( true);
+        }
     }
     if( current_state.compare("walk_back") == 0 || current_state.compare("jump_back") == 0){
         moveXpos( false);
@@ -289,4 +321,12 @@ void Player::DoPlayer(){
     }else if( x_pos > SCREEN_WIDTH){
         x_pos = SCREEN_WIDTH;
     }
+}
+
+Collision Player::getCollision(){
+    return animations[current_state]->getCollision();
+}
+
+bool Player::checkCollision( Collision temp){
+    return animations[current_state]->checkCollision( temp);
 }

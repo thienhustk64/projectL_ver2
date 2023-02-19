@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "Input.h"
 #include "Client.c"
+#include "Collision.h"
 
 BaseObject g_background;
 static SDL_Window *g_window = NULL;
@@ -41,8 +42,8 @@ bool InitData(){
     return success;
 }
 
-bool LoadBackground(){
-    bool ret = g_background.LoadImg( "data//background.png", g_screen);
+bool LoadBackground( string path){
+    bool ret = g_background.LoadImg( path, g_screen);
     return ret;
 }
 
@@ -59,34 +60,43 @@ void close(){
 
 int main( int argc, char *argv[]){
     Uint32 start;
-    std::string trigger;
+    std::string trigger1;
+    std::string trigger2;
 
     if( InitData() == false){
         return -1;
     }
-    if( LoadBackground() == false){
+    if( LoadBackground( "data//background.png") == false){
         return -1;
     }
 
     Input keyboard;
 
     Player player1;
-    player1.initialize("xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", true, 50, 200);
+    player1.initialize("xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", true, 400, 200);
 
     Player player2;
     player2.initialize("xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", false, 800, 200);
 
+    // Collision test1;
+    // Collision test2;
+    // test1.initCollision( 0, 0, 10, 10);
+    // test2.initCollision( 8, 0, 10, 10);
+    // if( test1.checkCollision( test2)){
+    //     printf("123");
+    // }
 
     bool is_quit = false;
+    bool is_collision = false;
     while( !is_quit){
         start = SDL_GetTicks();
         // Xem tk player có out
-        is_quit = keyboard.getEvent( &g_event, player1.isInverted());
+        is_quit = keyboard.getEvent( &g_event, player2.isInverted());
         // Trigger client
 
-        trigger = keyboard.getTrigger();
+        trigger1 = keyboard.getTrigger();
         // Gửi lên cho server
-        player1.updateState( trigger);
+        player2.updateState( trigger1);
         /*
             Nhận được trigger từ tk server nhận cả 2 trigger -> trigger1 trigger2
             player1.updateState( trigger1);
@@ -97,13 +107,19 @@ int main( int argc, char *argv[]){
 
         SDL_SetRenderDrawColor( g_screen, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
         SDL_RenderClear( g_screen);
-
+        is_collision = player1.checkCollision( player2.getCollision());
+        trigger2 = player2.getTrigger();
+        if( is_collision){
+            player1.updateState( trigger2);
+        }
         g_background.RenderMap( g_screen, NULL);
-        player1.DoPlayer();
-        player1.draw( g_screen);
 
-        player2.DoPlayer();
+        player2.DoPlayer(is_collision);
         player2.draw( g_screen);
+
+        player1.DoPlayer(is_collision);
+        player1.draw( g_screen);
+        printf("%d\n", player1.getHealth());
         SDL_RenderPresent( g_screen);
         if(1000/FPS > SDL_GetTicks()-start) {
             SDL_Delay(1000/FPS-(SDL_GetTicks()-start));

@@ -6,6 +6,7 @@ using namespace std;
 Animation::Animation(bool is_combo, bool is_continual){
     this->is_combo     = is_combo;
     this->is_continual = is_continual;
+    trigger = "NONE";
     current       = 0;
     current_delay = 0;
     x_pos = 0;
@@ -17,6 +18,7 @@ Animation::Animation(bool is_combo, bool is_continual, int x_pos, int y_pos, int
     this->is_combo     = is_combo;
     this->is_continual = is_continual;
     current       = 0;
+    trigger = "NONE";
     current_delay = 0;
     this->x_pos = x_pos;
     this->y_pos = y_pos;
@@ -29,6 +31,7 @@ Animation::Animation(const Animation &a){
     is_combo      = a.is_combo;
     is_continual  = a.is_continual;
     inverted      = a.inverted;
+    trigger = a.trigger;
     x_pos = a.x_pos;
 
     for(unsigned int i = 0; i < a.paths.size(); i++)    {
@@ -40,12 +43,6 @@ Animation::Animation(const Animation &a){
 }
 
 Animation::~Animation(){
-    // for(int i = 0; i < sprites.size(); i++){
-    //     delete sprites[i];
-    //     delete offense[i];
-    //     delete defense[i];
-    //     delete action[i];
-    // }
 }
 
 void Animation::addFrame( string file_name, float w, float h, int delay, int y_initial){
@@ -60,6 +57,10 @@ void Animation::setXPos( int x_pos){
     this->x_pos = x_pos;
 }
 
+void Animation::setTrigger( string trigger){
+    this->trigger = trigger;
+}
+
 int Animation::getHeight(){
     return heights[current];
 }
@@ -70,6 +71,10 @@ int Animation::getWidth(){
 
 int Animation::getXFinish(){
     return x_finish;
+}
+
+string Animation::getTrigger(){
+    return trigger;
 }
 
 int Animation::getYFinish(){
@@ -88,33 +93,47 @@ string Animation::getPath(){
     return paths[current];
 }
 
+Collision Animation::getCollision(){
+    return defense;
+}
+
+bool Animation::checkCollision( Collision temp){
+    return defense.checkCollision( temp);
+}
+
 bool Animation::draw( SDL_Renderer* screen, int x_pos_character, int y_pos_character, float scale, bool inverted){
     SDL_Surface* load_surface = IMG_Load( paths[current].c_str());
     SDL_Texture* new_texture = SDL_CreateTextureFromSurface( screen, load_surface);
     SDL_FreeSurface( load_surface);
     int width = int( widths[current]*scale);
     int height = int( heights[current]*scale);
-    
-
-    
+        
     // SDL_RenderCopy( screen, new_texture, NULL, &renderquad);
     if( inverted){
         x_finish = x_pos_character - int(x_pos*scale) + x_initial*current*-1;
         y_finish = y_pos_character + int(y_pos*scale);
         SDL_Rect renderquad = { x_finish-width, y_finish, width, height};
+        // printf("Player2: %d %d %d %d\n", x_finish-width, y_finish, width, height);
+        defense.initCollision( x_finish-width, y_finish, width, height);
         SDL_RenderCopyEx( screen, new_texture, NULL, &renderquad, 0, NULL, SDL_FLIP_HORIZONTAL);
     }else{
         x_finish = x_pos_character + int(x_pos*scale) + x_initial*current;
         y_finish = y_pos_character + int(y_pos*scale);
+        // printf("Player1: %d %d %d %d\n", x_finish, y_finish, width, height);
         SDL_Rect renderquad = { x_finish, y_finish, width, height};
+        defense.initCollision( x_finish, y_finish, width, height);
         SDL_RenderCopyEx( screen, new_texture, NULL, &renderquad, 0, NULL, SDL_FLIP_NONE);
     }
     SDL_DestroyTexture( new_texture);
-
+    // printf("%s\n", trigger.c_str());
     current++;
     if( current >= int( paths.size())){
         current = 0;
         return true;
     }
     return false;
+}
+
+void Animation::reset(){
+    current = 0;
 }
