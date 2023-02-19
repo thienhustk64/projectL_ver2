@@ -11,6 +11,7 @@ BaseObject g_background;
 static SDL_Window *g_window = NULL;
 static SDL_Renderer *g_screen = NULL;
 static SDL_Event g_event;
+TTF_Font* font = NULL;
 char tileMap[] = "data//map.dat";
 
 bool InitData(){
@@ -39,6 +40,16 @@ bool InitData(){
             }
         }
     }
+    if (TTF_Init() < 0){
+        SDL_Log("%s", TTF_GetError());
+        success = false;
+
+    }
+    font = TTF_OpenFont("font/arial.ttf", 30);
+    if ( !font ) {
+        SDL_Log("%s", TTF_GetError());
+        success = false;
+    }
     return success;
 }
 
@@ -56,6 +67,21 @@ void close(){
     g_window = NULL;
     IMG_Quit();
     SDL_Quit();
+    TTF_Quit();
+}
+
+void drawGame( int health1, int health2){
+    SDL_Rect rect1 = {10, 20, 400, 50};
+    SDL_Rect rect2 = {550, 20, 400, 50};
+    SDL_SetRenderDrawColor(g_screen, 255, 255, 255, 255);
+    SDL_RenderDrawRect(g_screen, &rect1);
+    SDL_RenderDrawRect(g_screen, &rect2);
+    rect1.w = max( 0, health1*4);
+    rect2.w = max( 0, health2*4);
+    SDL_SetRenderDrawColor(g_screen, 235, 7, 60, 0);
+    SDL_RenderFillRect(g_screen, &rect1);
+    SDL_RenderFillRect(g_screen, &rect2);
+
 }
 
 int main( int argc, char *argv[]){
@@ -66,6 +92,7 @@ int main( int argc, char *argv[]){
     if( InitData() == false){
         return -1;
     }
+
     if( LoadBackground( "data//background.png") == false){
         return -1;
     }
@@ -73,10 +100,10 @@ int main( int argc, char *argv[]){
     Input keyboard;
 
     Player player1;
-    player1.initialize("xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", true, 400, 200);
+    player1.initialize( "Player1", "xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", true, 400, 200);
 
     Player player2;
-    player2.initialize("xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", false, 800, 200);
+    player2.initialize( "Player2", "xml/ryu.xml", "xml/fireball.xml", "xml/fireball_collision.xml", false, 800, 200);
 
     // Collision test1;
     // Collision test2;
@@ -115,11 +142,11 @@ int main( int argc, char *argv[]){
         g_background.RenderMap( g_screen, NULL);
 
         player2.DoPlayer(is_collision);
-        player2.draw( g_screen);
+        player2.draw( g_screen, font);
 
         player1.DoPlayer(is_collision);
-        player1.draw( g_screen);
-        printf("%d\n", player1.getHealth());
+        player1.draw( g_screen, font);
+        drawGame( player1.getHealth(), player2.getHealth());
         SDL_RenderPresent( g_screen);
         if(1000/FPS > SDL_GetTicks()-start) {
             SDL_Delay(1000/FPS-(SDL_GetTicks()-start));

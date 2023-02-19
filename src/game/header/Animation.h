@@ -18,6 +18,7 @@ class Animation
         string name;
         vector<int> delays;
         vector<int> y_initials;
+        vector<int> x_poss;
         int x_pos;
         int y_pos;
         int x_initial;
@@ -48,9 +49,9 @@ class Animation
         Collision getCollision();
         string getPath();
         int getHeight();
-        void addFrame(string file_name, float w, float h, int delay, int y_initial);
         void setXPos( int x_pos);
-        bool draw( SDL_Renderer* screen, int x_pos_character, int y_pos_character, float scale, bool inverted);
+        void addFrame(string file_name, float w, float h, int delay, int y_initial, int x_pos);
+        bool draw( SDL_Renderer* screen, string name, TTF_Font* font, int x_pos_character, int y_pos_character, float scale, bool inverted);
         bool checkCollision( Collision temp);
 };
 

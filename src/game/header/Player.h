@@ -16,6 +16,7 @@
 class Player{
     private:
         int health;
+        std::string name;
         int x_pos;
         int y_pos;
         float alpha;
@@ -59,9 +60,9 @@ class Player{
 
         std::string getTrigger();
         std::map<std::string, bool> state;
-        bool initialize(std::string character, std::string skill, std::string skill_finish, bool player_one, float x_pos, float y_pos);
+        bool initialize( std::string name, std::string character, std::string skill, std::string skill_finish, bool player_one, float x_pos, float y_pos);
         void updateState( std::string trigger);
-        void draw( SDL_Renderer* screen);
+        void draw( SDL_Renderer* screen, TTF_Font* font);
         void DoPlayer(bool is_collison);
         Collision getCollision();
         bool checkCollision( Collision temp);

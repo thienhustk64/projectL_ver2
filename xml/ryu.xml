@@ -27,33 +27,34 @@
    <action name="block_low"      trigger="HIT" from="duck_back" to="duck_back"/>
    <action name="block_high"     trigger="HIT" from="walk_back" to="idle"/>
    <action name="hurt_air"       trigger="HIT" from="knocked_down,jump,jump_back,jump_forward,hurt_air,thrown" to="ground"/>
-   <animation name="start">
-      <position x_pos="10"/>
-      <frame path="data/ryu/idle00.png" width="20" height="40" delay="10"/>
-   </animation>
    <animation name="idle" continual="true">
-      <position x_pos="10"/>
       <frame path="data/ryu/idle00.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/idle01.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/idle02.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/idle03.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/idle04.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/idle05.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
@@ -90,36 +91,43 @@
       </frame>
    </animation>
    <animation name="walk_back" continual="true">
-      <position x_pos="10"/>
       <frame path="data/ryu/walk_back00.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="-0.2" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_back01.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_back02.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_back03.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_back04.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_back05.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_back06.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_back07.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
@@ -131,32 +139,38 @@
       </frame>
    </animation>
    <animation name="walk_forward" continual="true">
-      <position x_pos="10"/>
       <frame path="data/ryu/walk_forward00.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0.2" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_forward01.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_forward02.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_forward03.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_forward04.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_forward06.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/walk_forward07.png" width="20" height="40" delay="10">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
@@ -188,23 +202,25 @@
       </frame>
    </animation>
    <animation name="start_duck">
-      <position x_pos="10"/>
       <frame path="data/ryu/duck00.png" width="20" height="40" delay="2">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="20"/>
       </frame>
       <frame path="data/ryu/duck01.png" width="20" height="40" delay="2">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="20"/>
       </frame>
    </animation>
    <animation name="end_duck">
-      <position x_pos="10"/>
       <frame path="data/ryu/duck01.png" width="20" height="40" delay="2">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="20"/>
       </frame>
       <frame path="data/ryu/duck00.png" width="20" height="40" delay="2">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0"/>
          <defense x_pos="4" y_pos="4" width="12" height="20"/>
       </frame>
@@ -244,55 +260,65 @@
       </frame>
    </animation>
    <animation name="jump">
-      <position x_pos="10"/>
       <frame path="data/ryu/jump00.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="2.0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump01.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="1.6"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump02.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0.8"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump03.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0.4"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump04.png" width="20" height="40" delay="2">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="0.2"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_land00.png" width="20" height="40" delay="2">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="-0.2"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_land01.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="-0.4"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_land02.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="-0.8"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_land03.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="-1.6"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_land03.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0" y_vel="-2.0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
    </animation>
    <animation name="jump_forward">
-      <position x_pos="10"/>
       <frame path="data/ryu/jump_forward00.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="2.0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_forward01.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="1.6"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
@@ -309,10 +335,12 @@
          <defense x_pos="14" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_forward04.png" width="20" height="40" delay="2">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="-0.2"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_forward04.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="-0.4"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
@@ -321,21 +349,24 @@
          <defense x_pos="14" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_forward06.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="-1.6"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_forward07.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="0.4" y_vel="-2.0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
    </animation>
    <animation name="jump_back">
-      <position x_pos="10"/>
       <frame path="data/ryu/jump_forward07.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="2.0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_forward06.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="1.6"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
@@ -344,10 +375,12 @@
          <defense x_pos="14" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_forward04.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="0.4"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_forward04.png" width="20" height="40" delay="2">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="0.2"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
@@ -364,10 +397,12 @@
          <defense x_pos="14" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_forward01.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="-1.6"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
       <frame path="data/ryu/jump_forward00.png" width="20" height="40" delay="5">
+         <position x_pos="10"/>
          <move x_vel="-0.4" y_vel="-2.0"/>
          <defense x_pos="4" y_pos="4" width="12" height="30"/>
       </frame>
@@ -554,6 +589,7 @@
       <defense x_pos="14" y_pos="4" width="12" height="30"/>
    </frame>
    <frame path="data/ryu/2punch06.png" width="20" height="40" delay="10">
+      <position x_pos="10"/>
       <move x_vel="0" y_vel="0"/>
       <defense x_pos="14" y_pos="4" width="12" height="30"/>
    </frame>
@@ -598,10 +634,12 @@
 <animation name="kick">
    <trigger value="HIT"/>
    <frame path="data/ryu/kick00.png" width="20" height="40" delay="4">
+      <position x_pos="10"/>
       <move x_vel="0" y_vel="0"/>
       <defense x_pos="4" y_pos="4" width="12" height="30"/>
    </frame>
    <frame path="data/ryu/kick01.png" width="20" height="40" delay="4">
+      <position x_pos="10"/>
       <move x_vel="0" y_vel="0"/>
       <defense x_pos="4" y_pos="4" width="12" height="30"/>
    </frame>
@@ -616,14 +654,17 @@
       <collision path="data/collision/collision.xml" opponent="HIT_H" x_pos="0" y_pos="10" index="2"/>
    </frame>
    <frame path="data/ryu/kick04.png" width="20" height="40" delay="4">
+      <position x_pos="10"/>
       <move x_vel="0" y_vel="0"/>
       <defense x_pos="4" y_pos="4" width="12" height="30"/>
    </frame>
    <frame path="data/ryu/kick05.png" width="20" height="40" delay="4">
+      <position x_pos="10"/>
       <move x_vel="0" y_vel="0"/>
       <defense x_pos="4" y_pos="4" width="12" height="30"/>
    </frame>
    <frame path="data/ryu/kick06.png" width="20" height="40" delay="4">
+      <position x_pos="10"/>
       <move x_vel="0" y_vel="0"/>
       <defense x_pos="4" y_pos="4" width="12" height="30"/>
    </frame>

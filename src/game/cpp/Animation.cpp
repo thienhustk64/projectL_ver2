@@ -45,12 +45,13 @@ Animation::Animation(const Animation &a){
 Animation::~Animation(){
 }
 
-void Animation::addFrame( string file_name, float w, float h, int delay, int y_initial){
+void Animation::addFrame( string file_name, float w, float h, int delay, int y_initial, int x_pos){
     paths.push_back( file_name);
     widths.push_back( w);
     heights.push_back( h);
     delays.push_back( delay);
     y_initials.push_back( y_initial);
+    x_poss.push_back( x_pos);
 }
 
 void Animation::setXPos( int x_pos){
@@ -101,29 +102,48 @@ bool Animation::checkCollision( Collision temp){
     return defense.checkCollision( temp);
 }
 
-bool Animation::draw( SDL_Renderer* screen, int x_pos_character, int y_pos_character, float scale, bool inverted){
+bool Animation::draw( SDL_Renderer* screen, string name, TTF_Font* font, int x_pos_character, int y_pos_character, float scale, bool inverted){
     SDL_Surface* load_surface = IMG_Load( paths[current].c_str());
     SDL_Texture* new_texture = SDL_CreateTextureFromSurface( screen, load_surface);
+    SDL_Rect rectName;
+
     SDL_FreeSurface( load_surface);
     int width = int( widths[current]*scale);
     int height = int( heights[current]*scale);
         
     // SDL_RenderCopy( screen, new_texture, NULL, &renderquad);
     if( inverted){
-        x_finish = x_pos_character - int(x_pos*scale) + x_initial*current*-1;
+        x_finish = x_pos_character - int(x_poss[current]*scale) + x_initial*current*-1;
         y_finish = y_pos_character + int(y_pos*scale);
         SDL_Rect renderquad = { x_finish-width, y_finish, width, height};
         // printf("Player2: %d %d %d %d\n", x_finish-width, y_finish, width, height);
         defense.initCollision( x_finish-width, y_finish, width, height);
+        rectName.x = x_finish-width - int(x_poss[current]*scale) + 50;
+        // rectName.x =  x_finish-width;
         SDL_RenderCopyEx( screen, new_texture, NULL, &renderquad, 0, NULL, SDL_FLIP_HORIZONTAL);
     }else{
-        x_finish = x_pos_character + int(x_pos*scale) + x_initial*current;
+        x_finish = x_pos_character + int(x_poss[current]*scale) + x_initial*current;
         y_finish = y_pos_character + int(y_pos*scale);
         // printf("Player1: %d %d %d %d\n", x_finish, y_finish, width, height);
         SDL_Rect renderquad = { x_finish, y_finish, width, height};
         defense.initCollision( x_finish, y_finish, width, height);
+        rectName.x = x_finish;
         SDL_RenderCopyEx( screen, new_texture, NULL, &renderquad, 0, NULL, SDL_FLIP_NONE);
     }
+
+    if( name.compare("") != 0){
+        SDL_Color fg = { 255, 255, 255};
+        SDL_Surface* surface = TTF_RenderText_Solid(font, name.c_str(), fg);
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(screen, surface);
+        rectName.y = y_finish - surface->h;
+        rectName.w = surface->w;
+        rectName.h = surface->h;
+        SDL_RenderCopy( screen, texture, NULL, &rectName );
+        SDL_FreeSurface(surface);
+        SDL_DestroyTexture( texture);
+
+    }
+
     SDL_DestroyTexture( new_texture);
     // printf("%s\n", trigger.c_str());
     current++;
