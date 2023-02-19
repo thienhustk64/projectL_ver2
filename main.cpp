@@ -138,6 +138,7 @@ int main( int argc, char *argv[]){
         trigger2 = player2.getTrigger();
         if( is_collision){
             player1.updateState( trigger2);
+            player2.checkSkill( player1.isHurt());
         }
         g_background.RenderMap( g_screen, NULL);
 
