@@ -86,8 +86,8 @@ void drawGame( int health1, int health2){
 
 int main( int argc, char *argv[]){
     Uint32 start;
-    std::string trigger1;
-    std::string trigger2;
+    std::string triggerAction;
+    std::string triggerCollision;
 
     if( InitData() == false){
         return -1;
@@ -120,10 +120,9 @@ int main( int argc, char *argv[]){
         // Xem tk player có out
         is_quit = keyboard.getEvent( &g_event, player2.isInverted());
         // Trigger client
-
-        trigger1 = keyboard.getTrigger();
+        triggerAction = keyboard.getTrigger();
         // Gửi lên cho server
-        player2.updateState( trigger1);
+        player2.updateState( triggerAction);
         /*
             Nhận được trigger từ tk server nhận cả 2 trigger -> trigger1 trigger2
             player1.updateState( trigger1);
@@ -135,9 +134,10 @@ int main( int argc, char *argv[]){
         SDL_SetRenderDrawColor( g_screen, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
         SDL_RenderClear( g_screen);
         is_collision = player1.checkCollision( player2.getCollision());
-        trigger2 = player2.getTrigger();
+        // trigger of collision
+        triggerCollision = player2.getTrigger();
         if( is_collision){
-            player1.updateState( trigger2);
+            player1.updateState( triggerCollision);
             player2.checkSkill( player1.isHurt());
         }
         g_background.RenderMap( g_screen, NULL);
