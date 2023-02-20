@@ -29,6 +29,24 @@ bool BaseObject::LoadImg( std::string path, SDL_Renderer* screen){
     return p_object_ != NULL;
 }
 
+bool BaseObject::LoadText( std::string text, TTF_Font *font, SDL_Renderer* screen, int x, int y){
+    SDL_Color fg = { 255, 255, 255};
+    SDL_Texture *texture = NULL;
+    SDL_Surface* surface = TTF_RenderText_Solid(font, text.c_str(), fg);
+    if(surface !=NULL){
+        texture = SDL_CreateTextureFromSurface(screen, surface);
+        if( texture != NULL){
+            rect_.x = x;
+            rect_.y = y;
+            rect_.w = surface->w;
+            rect_.h = surface->h;
+        }
+        SDL_FreeSurface( surface);
+    }
+    p_object_ = texture;
+    return p_object_ != NULL;
+}
+
 void BaseObject::Render( SDL_Renderer* des, const SDL_Rect* clip){
     SDL_Rect renderquad = { rect_.x, rect_.y, rect_.w, rect_.h};
     SDL_RenderCopy( des, p_object_, clip, &renderquad);
@@ -46,4 +64,7 @@ void BaseObject::Free(){
         rect_.w = 0;
         rect_.h = 0;
     }
+}
+SDL_Rect BaseObject::getRect(){
+    return rect_;
 }

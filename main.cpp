@@ -1,8 +1,5 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "CommonFunc.h"
-#include "GameMap.h"
-#include "BaseObject.h"
 #include "menu.h"
 
 char tileMap[] = "data//map.dat";
@@ -36,10 +33,6 @@ bool InitData(){
     return success;
 }
 
-bool LoadBackground( string path){
-    bool ret = g_background.LoadImg( path, g_screen);
-    return ret;
-}
 
 void close(){
     g_background.Free();
@@ -59,9 +52,7 @@ int main( int argc, char *argv[]){
     if( InitData() == false){
         return -1;
     }
-    if( LoadBackground( "data//background.png") == false){
-        return -1;
-    }
+    
 
     bool is_quit = false;
     close();

@@ -3,16 +3,11 @@
 
 #include <windows.h>
 #include <string>
-#include "BaseObject.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 // Screen
 
-BaseObject g_background;
-static SDL_Window *g_window = NULL;
-static SDL_Renderer *g_screen = NULL;
-static SDL_Event g_event;
 const int SCREEN_WIDTH = 960;
 const int SCREEN_HEIGHT = 640;
 const int SCREEN_BPP = 32;
