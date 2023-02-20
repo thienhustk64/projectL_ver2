@@ -44,8 +44,30 @@
         "ios": "cpp",
         "queue": "cpp",
         "string": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "atomic": "cpp",
+        "cstdarg": "cpp",
+        "cstddef": "cpp",
+        "iterator": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "cinttypes": "cpp",
+        "pthread.h": "c",
+        "player.h": "c",
+        "strings.h": "c",
+        "types.h": "c",
+        "unistd.h": "c",
+        "stdio.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.errorSquiggles": "disabled",
+    "makefile.configurations": [
+        {
+            "makefile.extensionOutputFolder": "./.vscode",
+            "makefile.makePath": "/usr/bin/make",
+            "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+            "name": "Unnamed configuration 1"
+        }
+    ]
 }
