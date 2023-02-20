@@ -13,6 +13,7 @@ static SDL_Renderer *g_screen = NULL;
 static SDL_Event g_event;
 TTF_Font* font = NULL;
 char tileMap[] = "data//map.dat";
+Uint32 start;
 
 bool InitData(){
     bool success = true;
@@ -84,11 +85,44 @@ void drawGame( int health1, int health2){
 
 }
 
-int main( int argc, char *argv[]){
-    Uint32 start;
+bool inGame( Player *player1, Player *player2, Input keyboard){
     std::string triggerAction;
     std::string triggerCollision;
+    start = SDL_GetTicks();
+    // Xem tk player có out
+    bool is_quit = false;
+    bool is_collision = false;
+    is_quit = keyboard.getEvent( &g_event, player2->isInverted());
+    // Trigger client
+    triggerAction = keyboard.getTrigger();
+    // Gửi lên cho server
+    player2->updateState( triggerAction);
 
+    SDL_SetRenderDrawColor( g_screen, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
+    SDL_RenderClear( g_screen);
+    is_collision = player1->checkCollision( player2->getCollision());
+    // trigger of collision
+    triggerCollision = player2->getTrigger();
+    if( is_collision){
+        player1->updateState( triggerCollision);
+        player2->checkSkill( player1->isHurt());
+    }
+    g_background.RenderMap( g_screen, NULL);
+
+    player2->DoPlayer(is_collision);
+    player2->draw( g_screen, font);
+
+    player1->DoPlayer(is_collision);
+    player1->draw( g_screen, font);
+    drawGame( player1->getHealth(), player2->getHealth());
+    SDL_RenderPresent( g_screen);
+    if(1000/FPS > SDL_GetTicks()-start) {
+        SDL_Delay(1000/FPS-(SDL_GetTicks()-start));
+    }
+    return is_quit;
+}
+
+int main( int argc, char *argv[]){
     if( InitData() == false){
         return -1;
     }
@@ -114,44 +148,9 @@ int main( int argc, char *argv[]){
     // }
 
     bool is_quit = false;
-    bool is_collision = false;
+    
     while( !is_quit){
-        start = SDL_GetTicks();
-        // Xem tk player có out
-        is_quit = keyboard.getEvent( &g_event, player2.isInverted());
-        // Trigger client
-        triggerAction = keyboard.getTrigger();
-        // Gửi lên cho server
-        player2.updateState( triggerAction);
-        /*
-            Nhận được trigger từ tk server nhận cả 2 trigger -> trigger1 trigger2
-            player1.updateState( trigger1);
-            player2.updateState( trigger2);
-        */
-
-        
-
-        SDL_SetRenderDrawColor( g_screen, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
-        SDL_RenderClear( g_screen);
-        is_collision = player1.checkCollision( player2.getCollision());
-        // trigger of collision
-        triggerCollision = player2.getTrigger();
-        if( is_collision){
-            player1.updateState( triggerCollision);
-            player2.checkSkill( player1.isHurt());
-        }
-        g_background.RenderMap( g_screen, NULL);
-
-        player2.DoPlayer(is_collision);
-        player2.draw( g_screen, font);
-
-        player1.DoPlayer(is_collision);
-        player1.draw( g_screen, font);
-        drawGame( player1.getHealth(), player2.getHealth());
-        SDL_RenderPresent( g_screen);
-        if(1000/FPS > SDL_GetTicks()-start) {
-            SDL_Delay(1000/FPS-(SDL_GetTicks()-start));
-        }
+        is_quit = inGame( &player1, &player2, keyboard);
     }
 
     close();

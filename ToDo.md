@@ -24,3 +24,8 @@
             máu: hàm gọi máu
             triggerAction:
             triggerCollision:
+        + server gửi về:
+            id
+            máu
+            triggerAction: của tk id
+            triggerCollision: của tk đối thằng
