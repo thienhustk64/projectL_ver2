@@ -14,7 +14,10 @@
 struct sockaddr_in server_addr;
 SOCKET sockfd;
 WSADATA wsa;
-
+typedef struct data{
+	char str[100];
+	char str2[100];
+}data;
 int setupClient(){
 	//Initialise winsock
     if(WSAStartup(MAKEWORD(2, 2), &wsa) != 0){
@@ -53,14 +56,20 @@ void Listen_To_Server(){
 	// }
     int k;
 	int length = sizeof(server_addr);
+	data tmp ;
+	strcpy(tmp.str,"Thanh");
+	strcpy(tmp.str2,"deptrai");
 	do{
 		memset(buffer, 0, sizeof(*buffer));
+		strcat(buffer,tmp.str);
+		strcat(buffer,"|");
+		strcat(buffer,tmp.str2);
 		// ZeroMemory(token, sizeof(token));
 		// for(i = 0; i < 10; i++){
 		// 	memset(token[i], '\0', 1000);
 		// }
         scanf("%d",&k);
-        strcpy(buffer,"thanh");
+        
 		// buffer_size = recvfrom(sockfd, buffer, 1000, 0, (SOCKADDR *) &server_addr, &length);
 		// buffer[buffer_size] = '\0';
         sendToServer(sockfd,server_addr,buffer);

@@ -763,7 +763,15 @@ void startServer(){
         memset(buffer, 0, sizeof(*buffer));
         ZeroMemory(&client_addr, sizeof(client_addr));
         client_addr = ListenToClient(sockfd, client_addr, buffer);
-        printf("%s",buffer);
+        // printf("%s",buffer);
+        char name[100];
+        char *token = strtok(buffer,"|");
+        strcpy(name,token);
+        while(token != NULL){
+              printf("%s\n",token);
+            token = strtok(NULL,"|");
+          
+        }
         // type = GetType(buffer);
         // if(type == LOGIN_PACK){
         //     for(i = 0; i < MAX_CLIENT; i++){
