@@ -2,9 +2,11 @@
 
 Menu::Menu(){
     g_background = new BaseObject();
+    text_input = new BaseObject();
 }
 Menu::~Menu(){
     g_background->Free();
+    text_input->Free();
     for( unsigned int i = 0; i < text_objects.size(); i++ ){
         text_objects[i]->Free();
     }
@@ -39,4 +41,22 @@ SDL_Rect Menu::getRect( int index){
         return {0,0,0,0};
     }
     return text_objects[index]->getRect();
+}
+
+bool Menu::addTextInput(string text, TTF_Font* font,SDL_Renderer* g_screen , int x, int y){
+    // text_input->Free();
+    bool ret = text_input->LoadText( text, font, g_screen, x, y);
+    return ret;
+}
+bool Menu::addTextInputx(string text, TTF_Font* font,SDL_Renderer* g_screen , int x, int y){
+    // text_input->Free();
+    bool ret = text_input->LoadText( text, font, g_screen, x, y);
+    return ret;
+}
+
+void Menu::drawTextInput( SDL_Renderer *g_screen){
+    text_input->Render(g_screen, NULL);
+}
+void Menu::drawTextInputx( SDL_Renderer *g_screen){
+    text_input->Render(g_screen, NULL);
 }
