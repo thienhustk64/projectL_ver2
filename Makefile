@@ -1,19 +1,26 @@
 CC = g++
 BUILDDIR = build
 SOURCEDIR = src\game\cpp
-INCLUDE_PATHS = -I src\sdl\include -I src\game\header
+SOCKETDIR = src\socket\cpp
+INCLUDE_PATHS = -I src\sdl\include -I src\game\header -I src\socket\header
 LIBRARY_PATHS = -L src\sdl\lib
 COMPILER_FLAGS = -Wall -g -c
-LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lws2_32 -lSDL2_image
+LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lws2_32 -lSDL2_image -pthread
 
-OBJS := $(BUILDDIR)\main.o $(BUILDDIR)\CommonFunc.o $(BUILDDIR)\BaseObject.o $(BUILDDIR)\GameMap.o $(BUILDDIR)\Animation.o $(BUILDDIR)\Player.o $(BUILDDIR)\tinyxml2.o $(BUILDDIR)\ultis.o $(BUILDDIR)\Input.o $(BUILDDIR)\Collision.o
+OBJS := $(BUILDDIR)\main.o $(BUILDDIR)\CommonFunc.o $(BUILDDIR)\BaseObject.o $(BUILDDIR)\GameMap.o $(BUILDDIR)\Animation.o $(BUILDDIR)\Player.o $(BUILDDIR)\tinyxml2.o $(BUILDDIR)\ultis.o $(BUILDDIR)\Input.o $(BUILDDIR)\Collision.o $(BUILDDIR)\menu_state.o $(BUILDDIR)\Screen.o $(BUILDDIR)\packet.o
 OBJ_NAME = main
 
-all : $(OBJS) 
-	$(CC) $(OBJS) $(LIBRARY_PATHS) $(LINKER_FLAGS) -o $(OBJ_NAME)
+all : $(OBJS)
+	gcc src\socket\header\packet.h -Wall -c src\socket\cpp\packet.c -I src\socket\header
+	gcc -pthread server.c packet.o -o  server -lws2_32 -I src\socket\header
+	$(CC) $(OBJS) $(LIBRARY_PATHS) $(LINKER_FLAGS) -I src\socket\header -o $(OBJ_NAME)
+	
 
 $(BUILDDIR)\tinyxml2.o: $(SOURCEDIR)\tinyxml2.cpp
 	$(CC) $(SOURCEDIR)\tinyxml2.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\tinyxml2.o
+
+$(BUILDDIR)\packet.o: $(SOCKETDIR)\packet.cpp
+	$(CC) $(SOCKETDIR)\packet.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\packet.o
 
 $(BUILDDIR)\ultis.o: $(SOURCEDIR)\ultis.cpp
 	$(CC) $(SOURCEDIR)\ultis.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\ultis.o
@@ -38,6 +45,12 @@ $(BUILDDIR)\Input.o: $(SOURCEDIR)\Input.cpp
 
 $(BUILDDIR)\Collision.o: $(SOURCEDIR)\Collision.cpp
 	$(CC) $(SOURCEDIR)\Collision.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\Collision.o
+
+$(BUILDDIR)\menu_state.o: $(SOURCEDIR)\menu_state.cpp
+	$(CC) $(SOURCEDIR)\menu_state.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\menu_state.o
+
+$(BUILDDIR)\Screen.o: $(SOURCEDIR)\Screen.cpp
+	$(CC) $(SOURCEDIR)\Screen.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\Screen.o
 
 $(BUILDDIR)\main.o: main.cpp
 	$(CC) main.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\main.o

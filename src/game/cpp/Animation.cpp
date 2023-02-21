@@ -117,7 +117,7 @@ bool Animation::draw( SDL_Renderer* screen, string name, TTF_Font* font, int x_p
         y_finish = y_pos_character + int(y_pos*scale);
         SDL_Rect renderquad = { x_finish-width, y_finish, width, height};
         // printf("Player2: %d %d %d %d\n", x_finish-width, y_finish, width, height);
-        defense.initCollision( x_finish-width, y_finish, width, height);
+        defense.initCollision( x_finish-width + 15, y_finish, width, height);
         rectName.x = x_finish-width - int(x_poss[current]*scale) + 50;
         // rectName.x =  x_finish-width;
         SDL_RenderCopyEx( screen, new_texture, NULL, &renderquad, 0, NULL, SDL_FLIP_HORIZONTAL);
@@ -126,7 +126,7 @@ bool Animation::draw( SDL_Renderer* screen, string name, TTF_Font* font, int x_p
         y_finish = y_pos_character + int(y_pos*scale);
         // printf("Player1: %d %d %d %d\n", x_finish, y_finish, width, height);
         SDL_Rect renderquad = { x_finish, y_finish, width, height};
-        defense.initCollision( x_finish, y_finish, width, height);
+        defense.initCollision( x_finish - 15, y_finish, width, height);
         rectName.x = x_finish;
         SDL_RenderCopyEx( screen, new_texture, NULL, &renderquad, 0, NULL, SDL_FLIP_NONE);
     }
