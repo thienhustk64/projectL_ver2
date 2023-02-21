@@ -1,8 +1,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+<<<<<<< HEAD
 #include "CommonFunc.h"
 #include "BaseObject.h"
 #include "GameMap.h"
+=======
+>>>>>>> 52730ced2ba8a27a0576dff82acdcab7b458e66d
 #include "menu.h"
 
 static SDL_Window *g_window = NULL;
@@ -38,6 +41,7 @@ bool InitData(){
         }
     }
 
+<<<<<<< HEAD
     if (TTF_Init() < 0){
         SDL_Log("%s", TTF_GetError());
         success = false;
@@ -51,6 +55,8 @@ bool InitData(){
 
     return success;
 }
+=======
+>>>>>>> 52730ced2ba8a27a0576dff82acdcab7b458e66d
 
 void close(){
     SDL_DestroyRenderer( g_screen);
@@ -69,6 +75,10 @@ int main( int argc, char *argv[]){
     if( InitData() == false){
         return -1;
     }
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 52730ced2ba8a27a0576dff82acdcab7b458e66d
 
     bool is_quit = false;
     close();
