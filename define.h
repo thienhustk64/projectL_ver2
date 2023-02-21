@@ -12,13 +12,13 @@
 #define MAX 50
 #define MAX_NAME 20 // max character of player name
 #define MAX_RNAME 30
-#define MAX_MESSAGE 1000 // max character of message
+#define MAX_MESSAGE 100 // max character of message
 #define MAX_ROOM 20
 #define MAX_CLIENT 100
 
 #define PORT 27015 //defaut port to server listen
 #define PPORT 27016 //default port to get ping
-#define SERVER_IP_ADDR "127.0.0.1" //the ip address of server
+#define SERVER_IP_ADDR "26.94.122.0" //the ip address of server
 
 #define WEREWOLF 2
 #define WITCH 4

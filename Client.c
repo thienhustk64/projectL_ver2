@@ -97,6 +97,7 @@ void register_Acc(){
 	makeCleanToken(token,2);
 	sendToServer(sockfd,server_addr,buffer);
 }
+
 void host_game(CurrentPlayer *currUser){
     
     char **token = makeCleanToken();
@@ -180,21 +181,22 @@ void GetRoomList( Row *roomlist, char **token){ // Join Game
 void join_room(int row){
     enum pack_type type;
     char *buffer = calloc(MAX_MESSAGE ,sizeof(char));
-    printf("row = %d and room = %s and player = %s!\n", row, roomlist[row].roomName, currUser->name);
+    printf("row = %d and room = %s and player = %d!\n", row, roomlist[row].roomName, currUser->id);
     memset(buffer, 0, sizeof(*buffer));
-    strcpy(token[0], currUser->name);
+    sprintf(token[0],"%d",currUser->id);
     strcpy(token[1], roomlist[row].roomName);
-    printf("a\n");
-    sprintf(token[2],"%d",currUser->id);
-    printf("b\n");
     printf("token = %s and %s!\n", token[0], token[1]);
-    buffer = GetMess(token, 3, JOIN_ROOM);
+    buffer = GetMess(token, 2, JOIN_ROOM);
+    cleanToken(token,2);
+
     printf ("%s\n", buffer);
     sendToServer(sockfd, server_addr, buffer);
     memset(buffer, 0, sizeof(*buffer));
     ListenToServer(sockfd, server_addr, buffer);
+    printf("a\n");
     memset(token, 0, sizeof(*token[0]));
     token = GetToken(buffer, 2);
+    
     type = (enum pack_type)atoi(token[0]);
     if(type == SUCCEED_PACK){
         printf("[+]Joining Room -> %s\n", token[1]);

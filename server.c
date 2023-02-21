@@ -17,10 +17,12 @@
 #define MAX_CLIENT 100 //Max clients can connect to server
 int validRoom = 0;
 int count = 0;
+int index_cli;
 typedef struct Argument{
 	char* message;
     struct sockaddr_in client;
 }Argument;
+
 pthread_t tid, tid_2, tid_3;
 typedef struct Room{
     char *room_id;
@@ -54,7 +56,6 @@ SOCKET pingfd;
 struct sockaddr_in server_addr, client_addr, ping_addr;
 Client *client_list;
 Room *room_list;
-
 char **token;
 
 int setupServer(){ 
@@ -130,7 +131,6 @@ void addClient(int index, char **token, struct sockaddr_in client){
 
 Argument *getArument( char *message, struct sockaddr_in client){
     Argument *arg = calloc(1, sizeof(Argument));
-
     arg->message = calloc(100, sizeof(char));
     arg->client = client;
     memset(arg->message, 0, sizeof(*arg->message));
@@ -245,7 +245,6 @@ void* clientHandle(void *argument){
             if(client_list[i].id == -1)
                 continue;
             if(strcmp(client_list[i].name, token[1]) == 0 && strcmp(client_list[i].password,token[2]) == 0 ){
-                curr_id = i;
                 printf("SUCCESS login %d\n",client_list[i].id);
                 cleanToken(token,3);
                 sprintf(token[1],"%d",client_list[i].id);
@@ -253,6 +252,7 @@ void* clientHandle(void *argument){
                 buffer = GetMess(token, 2, LOGIN_PACK);
                 cleanToken(token,2);
                 sendToClient(sockfd,arg->client,buffer);
+                index_cli = i;
             }
          }
          
@@ -273,24 +273,33 @@ void* clientHandle(void *argument){
                     strcpy(room_list[i].room_id, token[1]);
                     room_list[i].max_client = 2;
                     room_list[i].player_id = calloc(room_list[i].max_client, sizeof(int));
-                    room_list[i].player_id[room_list[i].client_count] = client_list[i].id;
+                    room_list[i].player_id[room_list[i].client_count] = client_list[index_cli].id;
                     room_list[i].client_count++;
-                    client_list[i].room = &room_list[i];
-                    client_list[i].host = 1;
-                    index = i;
+                    client_list[index_cli].room = &room_list[i];
+                    client_list[index_cli].host = 1;
+                    // for (int  j = 0; j < MAX_CLIENT; j++)
+                    // {
+                    //     if (client_list[j].id == atoi(token[1]))
+                    //     {
+                    //         index = j;
+                            
+                    //     }
+                        
+                    // }
                     break;
                   
                 }
             }
             cleanToken(token, 2);
+            // printf("%d\n", index);
 
-            printf("[+]%s is hosting room '%s' max player is '%d'!\n", client_list[index].name, client_list[index].room->room_id, client_list[index].room->max_client);
+            printf("[+]%s is hosting room '%s' max player is '%d'!\n", client_list[index_cli].name, client_list[index_cli].room->room_id, client_list[index_cli].room->max_client);
             strcpy(token[0], "OK!");
             buffer = GetMess(token, 1, SUCCEED_PACK);
             cleanToken(token, 1);
             sendToClient(sockfd, arg->client, buffer);
         }
-        GetRoom(index);
+        GetRoom(index_cli);
         break;
 
     case JOIN_GAME:
@@ -318,11 +327,12 @@ void* clientHandle(void *argument){
         break;    
     
     case JOIN_ROOM:
-        token = GetToken(arg->message, 4);
-        printf(" ID join  %s\n", token[2]);
+        token = GetToken(arg->message, 3);
+        printf(" BUFF : %s\n", arg->message);
+        printf(" ID join  %s\n", token[1]);
         for (int i = 0; i < MAX_CLIENT; i++)
         {
-            if (client_list[i].id == atoi(token[2]))
+            if (client_list[i].id == atoi(token[1]))
             {
                 index = i;
                 break;
@@ -333,11 +343,13 @@ void* clientHandle(void *argument){
         if(j != -1){
             if(room_list[j].client_count < room_list[j].max_client && room_list[j].isStart != 1){
                 addPlayer(&room_list[j], index);
-                cleanToken(token, 4);
-                strcpy(token[0], "OK!");
-                buffer = GetMess(token, 2, SUCCEED_PACK);
+                cleanToken(token, 3);
+                strcpy(token[0], "OK");
+                buffer = GetMess(token, 1, SUCCEED_PACK);
+                printf("BUFF2 : %s\n", buffer);
                 cleanToken(token, 2);
                 sendToClient(sockfd, client_list[index].client, buffer);
+                printf("Gui OK %s \n", buffer);
                 for(i = 0; i < client_list[index].room->max_client; i++){
                     if(client_list[index].room->player_id[i] != 0){
                         GetRoom(client_list[index].room->player_id[i] - 1);
@@ -426,7 +438,7 @@ int main(){
         client_list[i].password = (char*)malloc(sizeof(char)*MAX);
     }
     readFile();
-    // printf("%s",client_list[0].name);
+    printf("%s",client_list[1].name);
     // int i;
     room_list = calloc(MAX_ROOM, sizeof(Room));
 	// client_list = calloc(MAX_CLIENT, sizeof(Client));
