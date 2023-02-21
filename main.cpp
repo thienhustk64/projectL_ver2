@@ -1,10 +1,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "CommonFunc.h"
-#include "GameMap.h"
 #include "BaseObject.h"
+#include "GameMap.h"
 #include "menu.h"
 
+static SDL_Window *g_window = NULL;
+static SDL_Renderer *g_screen = NULL;
+static SDL_Event g_event;
+TTF_Font* font = NULL;
 char tileMap[] = "data//map.dat";
 
 bool InitData(){
@@ -33,16 +37,22 @@ bool InitData(){
             }
         }
     }
+
+    if (TTF_Init() < 0){
+        SDL_Log("%s", TTF_GetError());
+        success = false;
+
+    }
+    font = TTF_OpenFont("font/arial.ttf", 30);
+    if ( !font ) {
+        SDL_Log("%s", TTF_GetError());
+        success = false;
+    }
+
     return success;
 }
 
-bool LoadBackground( string path){
-    bool ret = g_background.LoadImg( path, g_screen);
-    return ret;
-}
-
 void close(){
-    g_background.Free();
     SDL_DestroyRenderer( g_screen);
     g_screen = NULL;
 
@@ -57,9 +67,6 @@ int main( int argc, char *argv[]){
     std::string trigger;
 
     if( InitData() == false){
-        return -1;
-    }
-    if( LoadBackground( "data//background.png") == false){
         return -1;
     }
 

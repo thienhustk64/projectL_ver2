@@ -19,6 +19,7 @@ class BaseObject{
         }
         
         bool LoadImg( std::string path, SDL_Renderer* screen);
+        bool LoadText( std::string text, SDL_Renderer* screen);
         void Render( SDL_Renderer* des, const SDL_Rect* clip=NULL);
         void RenderMap( SDL_Renderer* des, const SDL_Rect* clip=NULL);
         void Free();

@@ -5,6 +5,7 @@ using namespace std;
 //  g_background.RenderMap( g_screen, Null) rendermap
 
 // Cau truc
+// trigger
 //  RenderColor
 // Render Clear
 

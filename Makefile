@@ -6,7 +6,7 @@ LIBRARY_PATHS = -L src\sdl\lib
 COMPILER_FLAGS = -Wall -g -c
 LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lws2_32 -lSDL2_image
 
-OBJS := $(BUILDDIR)\main.o $(BUILDDIR)\CommonFunc.o $(BUILDDIR)\BaseObject.o $(BUILDDIR)\GameMap.o $(BUILDDIR)\menu.o
+OBJS := $(BUILDDIR)\main.o $(BUILDDIR)\CommonFunc.o $(BUILDDIR)\BaseObject.o $(BUILDDIR)\menu.o
 OBJ_NAME = main
 
 all : $(OBJS) 
@@ -17,9 +17,6 @@ $(BUILDDIR)\CommonFunc.o: $(SOURCEDIR)\CommonFunc.cpp
 
 $(BUILDDIR)\BaseObject.o: $(SOURCEDIR)\BaseObject.cpp
 	$(CC) $(SOURCEDIR)\BaseObject.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\BaseObject.o
-
-$(BUILDDIR)\GameMap.o: $(SOURCEDIR)\GameMap.cpp
-	$(CC) $(SOURCEDIR)\GameMap.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\GameMap.o
 
 $(BUILDDIR)\menu.o: $(SOURCEDIR)\menu.cpp
 	$(CC) $(SOURCEDIR)\menu.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\menu.o
