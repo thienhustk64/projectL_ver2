@@ -1,7 +1,17 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+<<<<<<< HEAD
+#include "CommonFunc.h"
+#include "BaseObject.h"
+#include "GameMap.h"
+=======
+>>>>>>> 52730ced2ba8a27a0576dff82acdcab7b458e66d
 #include "menu.h"
 
+static SDL_Window *g_window = NULL;
+static SDL_Renderer *g_screen = NULL;
+static SDL_Event g_event;
+TTF_Font* font = NULL;
 char tileMap[] = "data//map.dat";
 
 bool InitData(){
@@ -30,12 +40,25 @@ bool InitData(){
             }
         }
     }
+
+<<<<<<< HEAD
+    if (TTF_Init() < 0){
+        SDL_Log("%s", TTF_GetError());
+        success = false;
+
+    }
+    font = TTF_OpenFont("font/arial.ttf", 30);
+    if ( !font ) {
+        SDL_Log("%s", TTF_GetError());
+        success = false;
+    }
+
     return success;
 }
-
+=======
+>>>>>>> 52730ced2ba8a27a0576dff82acdcab7b458e66d
 
 void close(){
-    g_background.Free();
     SDL_DestroyRenderer( g_screen);
     g_screen = NULL;
 
@@ -52,7 +75,10 @@ int main( int argc, char *argv[]){
     if( InitData() == false){
         return -1;
     }
+<<<<<<< HEAD
+=======
     
+>>>>>>> 52730ced2ba8a27a0576dff82acdcab7b458e66d
 
     bool is_quit = false;
     close();

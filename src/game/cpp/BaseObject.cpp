@@ -29,6 +29,12 @@ bool BaseObject::LoadImg( std::string path, SDL_Renderer* screen){
     return p_object_ != NULL;
 }
 
+<<<<<<< HEAD
+bool BaseObject::LoadText( std::string text, SDL_Renderer* screen){
+    
+    return p_object_ != NULL;
+}
+=======
 bool BaseObject::LoadText( std::string text, TTF_Font *font, SDL_Renderer* screen, int x, int y){
     SDL_Color fg = { 255, 255, 255};
     SDL_Texture *texture = NULL;
@@ -47,6 +53,7 @@ bool BaseObject::LoadText( std::string text, TTF_Font *font, SDL_Renderer* scree
     return p_object_ != NULL;
 }
 
+>>>>>>> 52730ced2ba8a27a0576dff82acdcab7b458e66d
 void BaseObject::Render( SDL_Renderer* des, const SDL_Rect* clip){
     SDL_Rect renderquad = { rect_.x, rect_.y, rect_.w, rect_.h};
     SDL_RenderCopy( des, p_object_, clip, &renderquad);

@@ -17,7 +17,11 @@ class BaseObject{
         }
         
         bool LoadImg( std::string path, SDL_Renderer* screen);
+<<<<<<< HEAD
+        bool LoadText( std::string text, SDL_Renderer* screen);
+=======
         bool LoadText( std::string text, TTF_Font *font, SDL_Renderer* screen, int x, int y);
+>>>>>>> 52730ced2ba8a27a0576dff82acdcab7b458e66d
         void Render( SDL_Renderer* des, const SDL_Rect* clip=NULL);
         void RenderMap( SDL_Renderer* des, const SDL_Rect* clip=NULL);
         void Free();
