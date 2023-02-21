@@ -53,9 +53,6 @@ float Player::getXpos(){
 }
 
 string Player::getTrigger(){
-    if( is_skill){
-        return animations["skill"]->getTrigger();
-    }
     return animations[current_state]->getTrigger();
 }
 
@@ -327,22 +324,9 @@ void Player::DoPlayer( bool is_collison){
 }
 
 Collision Player::getCollision(){
-    if( is_skill){
-        return animations["skill"]->getCollision();
-    }
     return animations[current_state]->getCollision();
 }
 
 bool Player::checkCollision( Collision temp){
     return animations[current_state]->checkCollision( temp);
-}
-
-void Player::checkSkill( bool another_hurt){
-    if( is_skill && another_hurt){
-        is_skill = false;
-        is_skill_finish = true;
-        animations["skill"]->reset();
-        x_pos_skill_finish = animations["skill"]->getXFinish();
-        y_pos_skill_finish = animations["skill"]->getYFinish();
-    }
 }
