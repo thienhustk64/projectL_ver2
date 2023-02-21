@@ -11,12 +11,14 @@
 #include<pthread.h>
 #include<windef.h>
 #include <time.h>
+#include"packet.h"
+#include"define.h"
 #define CLIENT_TIMEOUT 4
 #define MAX_CLIENT 100 //Max clients can connect to server
 int validRoom = 0;
 int count = 0;
+int check = 0;
 typedef struct Argument{
-	int index;
 	char* message;
     struct sockaddr_in client;
 }Argument;
@@ -37,19 +39,16 @@ typedef struct Room{
 
 typedef struct Client{
 	struct sockaddr_in client;
-    int role;
 	char *name;
 	int id;
+    char *password;
 	Room *room;
 	int host;
-    int timeout;
     int heal;
-    int vote_count;
-    int target;
 }Client;
 
 // local variable
-Client *client_tmp;
+Client *client_list;
 pthread_t tid, tid_2, tid_3;
 SOCKET sockfd;
 SOCKET pingfd;
@@ -119,20 +118,20 @@ void closeServer(){
 	WSACleanup();
 }
 
-void addClient(int index, char *client_name, struct sockaddr_in client){
+void addClient(int index, char **token, struct sockaddr_in client){
  
-    client_tmp[index].id = index + 1;
-
-    // strcpy(client_tmp[index].name, client_name);
-    client_tmp[index].name =  strdup(client_name);
-    client_tmp[index].client = client;
-    printf("[+]%s with id %d from ip %s is joined server!\n", client_tmp[index].name, client_tmp[index].id, inet_ntoa(client_tmp[index].client.sin_addr));
+    client_list[index].id = index + 1;
+    // strcpy(client_list[index].name, client_name);
+    strcpy( client_list[index].name, token[1] );
+    strcpy( client_list[index].password, token[2] );
+    client_list[index].client = client;
+    printf("[+]%s with id %d from ip %s is joined server!\n", client_list[index].name, client_list[index].id, inet_ntoa(client_list[index].client.sin_addr));
    
 }
 
-Argument *getArument(int index, char *message, struct sockaddr_in client){
+Argument *getArument( char *message, struct sockaddr_in client){
     Argument *arg = calloc(1, sizeof(Argument));
-    arg->index = index;
+
     arg->message = calloc(1000, sizeof(char));
     arg->client = client;
     memset(arg->message, 0, sizeof(*arg->message));
@@ -140,27 +139,84 @@ Argument *getArument(int index, char *message, struct sockaddr_in client){
     return arg;
 }
 
-void *handle_chat(void *argument){
-      
-        Argument *arg = (Argument *) argument;
+// void *handle_chat(void *argument){
+//       int mem1 =1, mem2 =0;
+//         Argument *arg = (Argument *) argument;
+//         if(check == 0)
+//             addClient(arg->index,strdup("Thanh"),arg->client);
+//         char buffer[100] ;
        
-        printf("Ngu");
-        addClient(arg->index,strdup("Thanh"),arg->client);
-        char buffer[100] ;
-       
-        strcpy(buffer,"adu|dz");
-        char name[100];
-        char *token = strtok(buffer,"|");
-        strcpy(name,token);
-        while(token != NULL){
-            // printf("%s\n",token);
-            token = strtok(NULL,"|");
+//         strcpy(buffer,"oke|dz");
+//         char name[100];
+//         char *token = strtok(buffer,"|");
+//         strcpy(name,token);
+//         while(token != NULL){
+//             // printf("%d\n",client_list[0]);
+//             token = strtok(NULL,"|");
+//         }
+//         if(mem1 == arg->index){
+//             sendToClient(sockfd,client_list[mem2].client,name);
+
+//         }
+//         else
+//             sendToClient(sockfd,client_list[mem1].client,"dz");
+
+// }
+
+
+void* clientHandle(void *argument){
+    pthread_detach(pthread_self());
+    int i, j = -1;
+    int *list = calloc(MAX_ROOM, sizeof(int));
+    char *tmp, *tmp2;
+    char *buffer = calloc(MAX_MESSAGE, sizeof(char));
+    Argument *arg = (Argument *) argument;
+    enum pack_type type = GetType(arg->message);
+    printf("[+]Client %d\n", (int)type);
+    switch (type){
+    case REGISTER_PACK:
+        for(i = 0 ; i  < MAX_CLIENT ;i++){
+            if (client_list[i].id == -1){
+                token = GetToken(arg->message, 3);
+                addClient(i, token, arg->client);
+                 FILE *pt = fopen("account.txt", "a+");
+                fprintf(pt,"\n%d",i+1);
+                fprintf(pt," %s",token[1]);
+                fprintf(pt," %s",token[2]);
+                cleanToken(token, 3);
+                sprintf(token[1], "%d", client_list[i].id);
+                strcpy(token[0], "OK");
+                buffer = GetMess(token, 2, LOGIN_PACK);
+                cleanToken(token,2);
+                sendToClient(sockfd, arg->client, buffer);
+                fclose(pt);
+                break;
+            }
         }
-        sendToClient(sockfd,client_tmp[arg->index].client,name);
+        
+        break;
+    
+    case LOGIN_PACK:
+         token = GetToken(arg->message, 3);
+         for(i = 0 ; i  < MAX_CLIENT ;i++){
+            if(client_list[i].id == -1)
+                continue;
+            if(strcmp(client_list[i].name, token[1]) == 0 && strcmp(client_list[i].password,token[2]) == 0 ){
+                printf("SUCCESS login %d\n",client_list[i].id);
+                cleanToken(token,3);
+                sprintf(token[1],"%d",client_list[i].id);
+                strcpy(token[0], "OK");
+                buffer = GetMess(token, 2, LOGIN_PACK);
+                cleanToken(token,2);
+                sendToClient(sockfd,arg->client,buffer);
+            }
+         }
+        break;
+    }
 }
 void startServer(){
     int i;
-    // enum pack_type type;
+    enum pack_type type;
 
   
     char *buffer = calloc(1000, sizeof(char));
@@ -169,14 +225,12 @@ void startServer(){
         memset(buffer, 0, sizeof(*buffer));
         ZeroMemory(&client_addr, sizeof(client_addr));
         client_addr = ListenToClient(sockfd, client_addr, buffer);
+        Argument *arg = getArument( buffer, client_addr);
+        pthread_create(&tid, NULL, &clientHandle, (void *)arg);
         // printf("%s",buffer);
-        for(int i = 0 ; i < MAX_CLIENT ;i++){
-            if(client_tmp[i].id == -1){
-                 Argument *arg = getArument(i, buffer, client_addr);
-                pthread_create(&tid, NULL, &handle_chat,(void *)arg);
-                break;
-            }
-        }
+        // int check = 0 ;
+       
+        
        
         // type = GetType(buffer);
         // if(type == LOGIN_PACK){
@@ -195,15 +249,43 @@ void startServer(){
         //         }
         //     }
         // }
+        check =0;
     }
 }
-
-int main(){
-      client_tmp = (Client*)malloc(sizeof(Client)*MAX_CLIENT); 
-      for(int i = 0 ; i < MAX_CLIENT ; i++){
-        client_tmp[i].id = -1;
-        ZeroMemory(&client_tmp[i].client, sizeof(client_tmp[i].client));
+void readFile(){
+    FILE *fp = fopen("account.txt","r");
+    if(fp == NULL){
+        printf("file not found\n");
     }
+    else{
+        int i = 0;
+        char c = fgetc(fp);
+      
+        while (c != EOF){
+            if(c != '\n' && c != '\t' && c != ' ' && c != EOF){
+                fseek(fp, -1, SEEK_CUR);
+                fscanf(fp, "%d", &client_list[i].id);
+                fscanf(fp, "%s", client_list[i].name);
+                fscanf(fp, "%s",client_list[i].password);
+                i++;
+               
+            }
+            c = fgetc(fp);
+        }
+        fclose(fp);
+    }
+}
+int main(){
+    client_list = (Client*)malloc(sizeof(Client)*MAX_CLIENT); 
+  
+    for(int i = 0 ; i < MAX_CLIENT ; i++){
+        client_list[i].id = -1;
+        ZeroMemory(&client_list[i].client, sizeof(client_list[i].client));
+        client_list[i].name = (char*)malloc(sizeof(char)*MAX);
+        client_list[i].password = (char*)malloc(sizeof(char)*MAX);
+    }
+    readFile();
+    // printf("%s",client_list[0].name);
     // int i;
     // room_list = calloc(MAX_ROOM, sizeof(Room));
 	// client_list = calloc(MAX_CLIENT, sizeof(Client));
