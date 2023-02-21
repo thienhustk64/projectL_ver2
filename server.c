@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <winsock2.h>
-#pragma comment(lib, "ws2_32.lib")
 #include <strings.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -56,6 +55,7 @@ struct sockaddr_in server_addr, client_addr, ping_addr;
 Client *client_list;
 Room *room_list;
 
+int index_cli;
 char **token;
 
 int setupServer(){ 
@@ -105,7 +105,7 @@ int setupServer(){
 
 struct sockaddr_in ListenToClient(SOCKET sockfd, struct sockaddr_in client_addr, char *buffer){
     int buffer_size, length = sizeof(client_addr);
-    buffer_size = recvfrom(sockfd, buffer, 1000, 0, (SOCKADDR *)&client_addr, &length);
+    buffer_size = recvfrom(sockfd, buffer, 100, 0, (SOCKADDR *)&client_addr, &length);
     buffer[buffer_size] = '\0';
     return client_addr;
 }
@@ -132,7 +132,7 @@ void addClient(int index, char **token, struct sockaddr_in client){
 Argument *getArument( char *message, struct sockaddr_in client){
     Argument *arg = calloc(1, sizeof(Argument));
 
-    arg->message = calloc(1000, sizeof(char));
+    arg->message = calloc(100, sizeof(char));
     arg->client = client;
     memset(arg->message, 0, sizeof(*arg->message));
     strcpy(arg->message, message);
@@ -162,17 +162,28 @@ Argument *getArument( char *message, struct sockaddr_in client){
 //             sendToClient(sockfd,client_list[mem1].client,"dz");
 
 // }
-
+int checkRoom(char *roomName){
+    int i;
+    for(i = 0; i < MAX_ROOM; i++){
+        if(strcmp(room_list[i].room_id, roomName) == 0){
+            return i;
+        }
+    }
+    return 0;
+}
 
 void* clientHandle(void *argument){
     pthread_detach(pthread_self());
     int i, j = -1;
+          int mem1 =1, mem2 =0;
+    int is_login =0;
     int *list = calloc(MAX_ROOM, sizeof(int));
     char *tmp, *tmp2;
     char *buffer = calloc(MAX_MESSAGE, sizeof(char));
     Argument *arg = (Argument *) argument;
     enum pack_type type = GetType(arg->message);
     printf("[+]Client %d\n", (int)type);
+   
     switch (type){
     case REGISTER_PACK:
         for(i = 0 ; i  < MAX_CLIENT ;i++){
@@ -197,8 +208,10 @@ void* clientHandle(void *argument){
         break;
     
     case LOGIN_PACK:
+  
          token = GetToken(arg->message, 3);
          for(i = 0 ; i  < MAX_CLIENT ;i++){
+            
             if(client_list[i].id == -1)
                 continue;
             if(strcmp(client_list[i].name, token[1]) == 0 && strcmp(client_list[i].password,token[2]) == 0 ){
@@ -209,17 +222,92 @@ void* clientHandle(void *argument){
                 buffer = GetMess(token, 2, LOGIN_PACK);
                 cleanToken(token,2);
                 sendToClient(sockfd,arg->client,buffer);
+                index_cli = i;
+                is_login =1;
+                break;
             }
+           
+               
+            
+            
+           
          }
+         if(is_login == 0){
+             printf("Fail login\n");
+                cleanToken(token,3);
+                strcpy(token[0],"fail");
+                 buffer = GetMess(token, 2, LOGIN_PACK);
+                cleanToken(token,2);
+                sendToClient(sockfd,arg->client,buffer);
+            
+         }
+                    
+
+        break;
+    case HOST_GAME:
+       
+        token = GetToken(arg->message, 2);
+        
+        if(checkRoom(token[1]) != 0){
+            cleanToken(token, 2);
+            strcpy(token[1], "Room name already exists!");
+            buffer = GetMess(token, 1, ERROR_PACK);
+            cleanToken(token, 1);
+        }else{
+            printf("id truyen den la %s",token[1]);
+            for(i = 0; i < MAX_ROOM; i++){
+                if(strlen(room_list[i].room_id) == 0){
+                    strcpy(room_list[i].room_id, token[1]);
+                    room_list[i].max_client = 2;
+                    room_list[i].player_id = calloc(room_list[i].max_client, sizeof(int));
+                    room_list[i].player_id[room_list[i].client_count] = client_list[index_cli].id;
+                    room_list[i].client_count++;
+                    client_list[index_cli].room = &room_list[i];
+                    client_list[index_cli].host = 1;
+                 
+                    break;
+                  
+                }
+            }
+            cleanToken(token, 2);
+
+            printf("[+]%s is hosting room '%s' max player is '%d'!\n", client_list[index_cli].name, client_list[index_cli].room->room_id, client_list[index_cli].room->max_client);
+            strcpy(token[0], "OK!");
+            buffer = GetMess(token, 1, SUCCEED_PACK);
+            cleanToken(token, 1);
+            sendToClient(sockfd, arg->client, buffer);
+        }
+        // GetRoom(arg->index);
+        break;
+        case VOTE:
+  
+     
+       memset(buffer,0,100);
+       ListenToClient(sockfd, client_addr, buffer);
+        strcpy(buffer,"oke|dz");
+        char name[100];
+        char *token = strtok(buffer,"|");
+        strcpy(name,token);
+        while(token != NULL){
+            // printf("%d\n",client_tmp[0]);
+            token = strtok(NULL,"|");
+        }
+        if(mem1 == index_cli){
+            sendToClient(sockfd,client_list[mem2].client,name);
+
+        }
+        else
+            sendToClient(sockfd,client_list[mem1].client,"dz");
         break;
     }
+  
 }
 void startServer(){
     int i;
     enum pack_type type;
 
   
-    char *buffer = calloc(1000, sizeof(char));
+    char *buffer = calloc(100, sizeof(char));
   
     while(1){
         memset(buffer, 0, sizeof(*buffer));
@@ -276,6 +364,7 @@ void readFile(){
     }
 }
 int main(){
+     token = makeCleanToken();
     client_list = (Client*)malloc(sizeof(Client)*MAX_CLIENT); 
   
     for(int i = 0 ; i < MAX_CLIENT ; i++){
@@ -287,17 +376,14 @@ int main(){
     readFile();
     // printf("%s",client_list[0].name);
     // int i;
-    // room_list = calloc(MAX_ROOM, sizeof(Room));
+    room_list = calloc(MAX_ROOM, sizeof(Room));
 	// client_list = calloc(MAX_CLIENT, sizeof(Client));
-    // token = makeCleanToken();
-	// for(i = 0; i < MAX_ROOM; i++){
-	// 	room_list[i].room_id = calloc(MAX_NAME, sizeof(char));
-	// 	room_list[i].client_count = 0;
-    //     room_list[i].isStart = -1;
-    //     room_list[i].isNight = -1;
-    //     room_list[i].currentRole = -1;
-    //     room_list[i].current_wolf = 0;
-	// }
+   
+	for(int i = 0; i < MAX_ROOM; i++){
+		room_list[i].room_id = calloc(MAX_NAME, sizeof(char));
+		room_list[i].client_count = 0;
+
+	}
 	// for(i = 0; i < MAX_CLIENT; i++){
     //     client_list[i].role = -1;
 	// 	client_list[i].host = -1;
