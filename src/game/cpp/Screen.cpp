@@ -318,7 +318,7 @@ bool initLogin( Menu* menuLogin, TTF_Font* font, SDL_Renderer *g_screen){
     if( menuLogin->initBackground( "data//background.png", g_screen) == false){
         return false;
     }
-     if( menuLogin->addText( "LOGIN", font, g_screen, 400, 100) == false){
+    if( menuLogin->addText( "LOGIN", font, g_screen, 400, 100) == false){
         return false;
     }
     if( menuLogin->addText( "USER NAME", font, g_screen, 200, 200) == false){
@@ -335,6 +335,71 @@ bool initLogin( Menu* menuLogin, TTF_Font* font, SDL_Renderer *g_screen){
         return false;
     }
     if( menuLogin->addText( "EXIT", font, g_screen, 750, 500) == false){
+        return false;
+    }
+    return true;
+}
+
+State showPause( Menu *menuPause, SDL_Renderer *g_screen, SDL_Event g_event){
+        State select = NOCHANGE;
+    while( select == NOCHANGE){
+        while( SDL_PollEvent( &g_event)){
+            switch( g_event.type){
+                case SDL_WINDOWEVENT_CLOSE:
+                    select = EXIT;
+                    break;
+                case SDL_MOUSEBUTTONDOWN:{
+                    if(check_mouse_pos(menuPause->getRect(1))){
+                        select = INGAME;
+                    }else if(check_mouse_pos(menuPause->getRect(2))){
+                        select = MENU;
+                    }else if(check_mouse_pos(menuPause->getRect(3))){
+                        select = EXIT;
+                    }
+                    break;
+                }
+                case SDL_QUIT:
+                    select = EXIT;
+                    break;
+            }
+        }
+        SDL_SetRenderDrawColor( g_screen, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
+        SDL_RenderClear( g_screen);
+        //menuState->drawBackground
+        menuPause->drawBackground( g_screen );
+        if( check_mouse_pos( menuPause->getRect(1))){
+            SDL_Rect box = menuPause->getRect(1);
+            SDL_SetRenderDrawColor(g_screen, 255, 0, 0, 255);
+            SDL_RenderFillRect(g_screen, &box);
+        }else if(check_mouse_pos( menuPause->getRect(2))){
+            SDL_Rect box = menuPause->getRect(2);
+            SDL_SetRenderDrawColor(g_screen, 255, 0, 0, 255);
+            SDL_RenderFillRect(g_screen, &box);
+        }else if(check_mouse_pos( menuPause->getRect(3))){
+            SDL_Rect box = menuPause->getRect(3);
+            SDL_SetRenderDrawColor(g_screen, 255, 0, 0, 255);
+            SDL_RenderFillRect(g_screen, &box);
+        }
+        menuPause->drawButton( g_screen );
+        SDL_RenderPresent( g_screen);
+    }
+    return select;
+}
+
+bool initPause(  Menu* menuLogin, TTF_Font* font, SDL_Renderer *g_screen){
+    if( menuLogin->initBackground( "data//background.png", g_screen) == false){
+        return false;
+    }
+    if( menuLogin->addText( "GAME 2v2", font, g_screen, 390, 100) == false){
+        return false;
+    }
+    if( menuLogin->addText( "RESUME", font, g_screen, 400, 200) == false){
+        return false;
+    }
+    if( menuLogin->addText( "BACK TO MENU", font, g_screen, 360, 300) == false){
+        return false;
+    }
+    if( menuLogin->addText( "EXIT", font, g_screen, 430, 400) == false){
         return false;
     }
     return true;

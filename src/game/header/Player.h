@@ -67,6 +67,7 @@ class Player{
         Collision getCollision();
         bool checkCollision( Collision temp);
         void checkSkill( bool another_hurt);
+        void reset( int x_pos, int y_pos);
     };
 
 #endif

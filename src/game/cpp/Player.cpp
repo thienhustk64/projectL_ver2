@@ -346,3 +346,14 @@ void Player::checkSkill( bool another_hurt){
         y_pos_skill_finish = animations["skill"]->getYFinish();
     }
 }
+
+void Player::reset( int x_pos, int y_pos){
+    this->x_pos = x_pos;
+    this->y_pos = y_pos;
+    this->health = 100;
+    this->is_hurt = false;
+    this->is_skill = false;
+    this->is_skill_finish = false;
+    this->current_state = "idle";
+    this->previous_state = "idle";
+}

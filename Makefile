@@ -2,18 +2,16 @@ CC = g++
 BUILDDIR = build
 SOURCEDIR = src\game\cpp
 SOCKETDIR = src\socket\cpp
-INCLUDE_PATHS = -I src\sdl\include -I src\game\header -I src\socket\header
+INCLUDE_PATHS = -I src\sdl\include -I src\game\header
 LIBRARY_PATHS = -L src\sdl\lib
 COMPILER_FLAGS = -Wall -g -c
 LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lws2_32 -lSDL2_image -pthread
 
-OBJS := $(BUILDDIR)\main.o $(BUILDDIR)\CommonFunc.o $(BUILDDIR)\BaseObject.o $(BUILDDIR)\GameMap.o $(BUILDDIR)\Animation.o $(BUILDDIR)\Player.o $(BUILDDIR)\tinyxml2.o $(BUILDDIR)\ultis.o $(BUILDDIR)\Input.o $(BUILDDIR)\Collision.o $(BUILDDIR)\menu_state.o $(BUILDDIR)\Screen.o $(BUILDDIR)\packet.o
+OBJS := $(BUILDDIR)\main.o $(BUILDDIR)\CommonFunc.o $(BUILDDIR)\BaseObject.o $(BUILDDIR)\GameMap.o $(BUILDDIR)\Animation.o $(BUILDDIR)\Player.o $(BUILDDIR)\tinyxml2.o $(BUILDDIR)\ultis.o $(BUILDDIR)\Input.o $(BUILDDIR)\Collision.o $(BUILDDIR)\menu_state.o $(BUILDDIR)\Screen.o $(BUILDDIR)\Ingame.o
 OBJ_NAME = main
 
 all : $(OBJS)
-	gcc src\socket\header\packet.h -Wall -c src\socket\cpp\packet.c -I src\socket\header
-	gcc -pthread server.c packet.o -o  server -lws2_32 -I src\socket\header
-	$(CC) $(OBJS) $(LIBRARY_PATHS) $(LINKER_FLAGS) -I src\socket\header -o $(OBJ_NAME)
+	$(CC) $(OBJS) $(LIBRARY_PATHS) $(LINKER_FLAGS) -o $(OBJ_NAME)
 	
 
 $(BUILDDIR)\tinyxml2.o: $(SOURCEDIR)\tinyxml2.cpp
@@ -21,6 +19,9 @@ $(BUILDDIR)\tinyxml2.o: $(SOURCEDIR)\tinyxml2.cpp
 
 $(BUILDDIR)\packet.o: $(SOCKETDIR)\packet.cpp
 	$(CC) $(SOCKETDIR)\packet.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\packet.o
+
+$(BUILDDIR)\client.o: $(SOCKETDIR)\client.cpp
+	$(CC) $(SOCKETDIR)\client.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\client.o
 
 $(BUILDDIR)\ultis.o: $(SOURCEDIR)\ultis.cpp
 	$(CC) $(SOURCEDIR)\ultis.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\ultis.o
@@ -51,6 +52,9 @@ $(BUILDDIR)\menu_state.o: $(SOURCEDIR)\menu_state.cpp
 
 $(BUILDDIR)\Screen.o: $(SOURCEDIR)\Screen.cpp
 	$(CC) $(SOURCEDIR)\Screen.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\Screen.o
+
+$(BUILDDIR)\Ingame.o: $(SOURCEDIR)\Ingame.cpp
+	$(CC) $(SOURCEDIR)\Ingame.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\Ingame.o
 
 $(BUILDDIR)\main.o: main.cpp
 	$(CC) main.cpp $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILDDIR)\main.o

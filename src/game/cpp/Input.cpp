@@ -26,17 +26,17 @@ Input::~Input(){
 
 }
 
-bool Input::getEvent( SDL_Event *windowEvent, bool inverted){
-    bool done = false;
+int Input::getEvent( SDL_Event *windowEvent, bool inverted){
+    int done = 0;
     while( SDL_PollEvent( windowEvent)){
         switch( windowEvent->type){
             case SDL_WINDOWEVENT_CLOSE:
-                done = true;
+                done = 1;
                 break;
             case SDL_KEYDOWN:{
                 switch ( windowEvent->key.keysym.sym){
                     case SDLK_ESCAPE:
-                        done = true;
+                        done = 2;
                         break;
                     default:
                         break;
@@ -44,7 +44,7 @@ bool Input::getEvent( SDL_Event *windowEvent, bool inverted){
             }
             break;
             case SDL_QUIT:
-                done = true;
+                done = 1;
                 break;
         }
     }
