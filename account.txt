@@ -1,6 +1,8 @@
-1 thanh 123
-2 quan 123
-3 trung 123
-4 nam 123
-5 thien 123
-6 abc 123
+1 quan 123 1023
+2 thanh 123 802
+3 trung 123 506
+4 nambo 123 123
+5 thien 123 1001
+6 peter 123 1423
+7 antony 123 100
+8 minhquan 123 0
