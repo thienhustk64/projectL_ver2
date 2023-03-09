@@ -1,7 +1,7 @@
 #include "message.h"
 
 enum mess_type GetType(char *message){
-    char *tmp = calloc(MAX_MESSAGE, sizeof(char));
+    char *tmp = (char*)calloc(MAX_MESSAGE, sizeof(char));
     strcpy(tmp, message);
     strtok(tmp, "-");
     enum mess_type type = (enum mess_type)atoi(tmp);
@@ -10,8 +10,8 @@ enum mess_type GetType(char *message){
 }
 
 char *MakeMessage(char **token, int tokenSize, enum mess_type type){
-    char *type_str = calloc(4, sizeof(char));
-    char *packet_str = calloc(MAX_MESSAGE, sizeof(char));
+    char *type_str = (char*)calloc(4, sizeof(char));
+    char *packet_str = (char*)calloc(MAX_MESSAGE, sizeof(char));
     
     memset(packet_str, 0, sizeof(*packet_str));
 
@@ -27,9 +27,9 @@ char *MakeMessage(char **token, int tokenSize, enum mess_type type){
 
 char **GetToken(char *message, int tokenSize){
     int i;
-    char **token = calloc(200, sizeof(char *));
-    char *tmp = calloc(MAX_MESSAGE, sizeof(char));
-    char *buffer = calloc(MAX_MESSAGE, sizeof(char));
+    char **token = (char**)calloc(200, sizeof(char *));
+    char *tmp = (char*)calloc(MAX_MESSAGE, sizeof(char));
+    char *buffer = (char*)calloc(MAX_MESSAGE, sizeof(char));
     strcpy(buffer, message);
     for(i = 0; i < 200; i++){
         token[i] = calloc(MAX_MESSAGE, sizeof(char));
@@ -53,9 +53,9 @@ char **GetToken(char *message, int tokenSize){
 
 char **makeToken(){
     int i;
-    char **token = calloc(50, sizeof(char *));
+    char **token = (char**)calloc(50, sizeof(char *));
     for(i = 0; i < 50; i++){
-        token[i] = calloc(MAX_MESSAGE, sizeof(char));
+        token[i] = (char*)calloc(MAX_MESSAGE, sizeof(char));
     }
     return token;
 }
