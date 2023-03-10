@@ -15,6 +15,7 @@
 #include"define.h"
 
 struct sockaddr_in server_addr;
+pthread_t tid1, tid2;
 pthread_t tid;
 SOCKET sockfd;
 WSADATA wsa;
@@ -81,6 +82,24 @@ void ListenToServer(SOCKET sockfd, struct sockaddr_in server_addr, char *buffer)
     int buffer_size, length = sizeof(server_addr);
     buffer_size = recvfrom(sockfd, buffer, MAX_MESSAGE, 0, (SOCKADDR *)&server_addr, &length);
     buffer[buffer_size] = '\0';
+}
+
+void *sendToPingServer(){
+    pthread_detach(pthread_self());
+    char *buffer = calloc(4, sizeof(char));
+    sprintf(buffer, "%d", currUser->id);
+    printf("%s\n", buffer);
+    struct sockaddr_in pingServer;
+    SOCKET sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    ZeroMemory(&pingServer, sizeof(pingServer));
+    pingServer.sin_family = AF_INET;
+	pingServer.sin_port = htons(PORT + 1);
+	pingServer.sin_addr.S_un.S_addr = inet_addr(SERVER_IP_ADDR);
+    while(currUser->id != -1){
+        sendToServer(sockfd, pingServer, buffer);
+        Sleep(1000);
+    }
+    return NULL;
 }
 
 void register_Acc(){
@@ -249,15 +268,19 @@ void *handleMess(void *argument){
 			token = GetToken(arg->buffer,4);
 			printf("id cua %s la %d\n", token[3],atoi(token[2]));
             arg->currUser->id = atoi(token[2]);
+            currUser->id = arg->currUser->id;
             strcpy(arg->currUser->name, token[3]);
             cleanToken(token, 4);
             printf("chon :\n");
             scanf("%d", &choose);
             if (choose == 1)
-            {
+            {   printf("ID hien tai la %d\n", currUser->id);
+                pthread_create(&tid1, NULL, sendToPingServer, NULL);
                 host_game(arg->currUser);
+                break;
             }else if (choose == 2)
-            {
+            {   
+                pthread_create(&tid2, NULL, sendToPingServer, NULL);
                 GetRoomList(roomlist, token);
                 fflush(stdin);
                 printf("Chon join phong: \n");
@@ -295,9 +318,16 @@ int main(){
     
 	Arg *arg = calloc(1,sizeof(Arg));
 	arg->buffer = calloc(100,sizeof(char));
-    arg->currUser = calloc(10,sizeof(PlayerInfor));
-	pthread_t pid;
-	pthread_create(&pid,NULL,handleMess,(void*)arg);
+    arg->currUser = calloc(1,sizeof(PlayerInfor));
+
+    currUser = (PlayerInfor*)calloc(1, sizeof(PlayerInfor));
+    currUser->name = (char*)calloc(MAX_NAME, sizeof(char));
+    currUser->room = (char*)calloc(MAX_RNAME, sizeof(char));
+    currUser->id = -1;
+    currUser->isHost = -1;
+	// pthread_t pid;
+	// pthread_create(&pid,NULL,handleMess,(void*)arg);
+    handleMess(arg);
 
   
 	while(1);

@@ -13,9 +13,8 @@
 #include <time.h>
 #include"message.h"
 #include"define.h"
-
 int validRoom = 0;
-
+#define CLIENT_TIMEOUT 4
 typedef struct Argument{
     int index;
 	char* message;
@@ -42,6 +41,7 @@ typedef struct Client{
 	Room *room;
 	int host;
     int heal;
+    int time_out;
 }Client;
 
 Client *client_list;
@@ -64,13 +64,27 @@ int setupServer(){
 		printf("[-]Could not create socket : %d\n" , WSAGetLastError());
         return -1;
 	}
+    if((pingfd = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET){
+        printf("[-]Could not create socket : %d\n" , WSAGetLastError());
+        return -1;
+    }
 
     ZeroMemory(&server_addr, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	server_addr.sin_port = htons(5500);
 
+    ZeroMemory(&ping_addr, sizeof(ping_addr));
+    ping_addr.sin_family = AF_INET;
+	ping_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	ping_addr.sin_port = htons(5500 + 1);
+
 	if(bind(sockfd ,(SOCKADDR *)&server_addr , sizeof(server_addr)) == SOCKET_ERROR){
+		printf("[-]Bind failed with error code : %d\n" , WSAGetLastError());
+		return -1;
+	}
+
+    if(bind(pingfd ,(SOCKADDR *)&ping_addr , sizeof(ping_addr)) == SOCKET_ERROR){
 		printf("[-]Bind failed with error code : %d\n" , WSAGetLastError());
 		return -1;
 	}
@@ -116,6 +130,14 @@ int check_rank(int rank_point){
     return -1;
 }
 
+int isDead(int index){// kiem tra player chet chua
+    if(client_list[index].heal <= 0){
+        return DEAD;
+    }else{
+        return ALIVE;
+    }
+}
+
 Argument *getArument(int index, char *message, struct sockaddr_in client){
     Argument *arg = calloc(1, sizeof(Argument));
     arg->message = calloc(100, sizeof(char));
@@ -148,7 +170,7 @@ int checkRoom(char *roomName){
             return i;
         }
     }
-    return 0;
+    return -1;
 }
 
 int *countValidRoom(int *validRoom , int client_index){
@@ -180,6 +202,82 @@ void addPlayer(Room *room, int index){
     }
 }
 
+void removePlayer(Room *room, int player_id){
+    int i;
+    for(i = 0; i < 2 ; i++){
+        if(room->player_id[i] == player_id){
+            room->player_id[i] = 0;
+            room->client_count--;
+            printf("[+]'%s' with id '%d' has left room '%s'!\n", client_list[player_id - 1].name, player_id, client_list[player_id - 1].room->room_id);
+            break;
+        }
+    }
+}
+
+int checkEmptyRoom(Room *room){
+    if(room->client_count == 0){
+        printf("[+]Room '%s' has '%d' player(s)!\n", room->room_id, room->client_count);
+        printf("[+]Room '%s' has been removed!\n", room->room_id);
+        memset(room->player_id, 0 , sizeof(*room->player_id));
+        room->max_client = -1;
+        room->isStart = -1;
+        room->currentRole = -1;
+        //memset(room->playerRole, 0 ,sizeof(*room->playerRole));
+        memset(room->room_id, 0, sizeof(*room->room_id));
+        return 0;
+    }
+    printf("[+]Room '%s' has '%d' player(s)!\n", room->room_id, room->client_count);
+    return 1;
+}
+
+void removeClient(int index){
+    int i;
+    if(client_list[index].id != -1){
+        if(client_list[index].room != NULL){
+            removePlayer(client_list[index].room, client_list[index].id);
+            if(checkEmptyRoom(client_list[index].room)){
+                if(client_list[index].host == 1){
+                    printf("[+]Changing host of room '%s'!\n", client_list[index].room->room_id);
+                    char *buffer = calloc(4, sizeof(char));
+                    buffer = MakeMessage(token, 0, HOST_GAME);
+                    for(i = 0; i < client_list[index].room->max_client; i++){
+                        if(client_list[index].room->player_id[i] > 0 && client_list[index].id != client_list[index].room->player_id[i]){
+                            sendToClient(sockfd, client_list[client_list[index].room->player_id[i] - 1].client, buffer);
+                            client_list[client_list[index].room->player_id[i] - 1].host = 1;
+                            printf("[+]Host of room '%s' is set to player '%s' with id '%d'!\n", client_list[index].room->room_id, client_list[client_list[index].room->player_id[i] -1].name, client_list[index].room->player_id[i]);
+                            break;
+                        }
+                    }
+                    free(buffer);
+                }
+                // for(i = 0; i < client_list[index].room->max_client; i++){
+                //     if(client_list[index].room->player_id[i] != 0){
+                //         GetRoom(client_list[index].room->player_id[i] - 1);
+                //         printf("[+]Sent to other player(s)!\n");
+                //     }
+                // }
+            }
+        }
+        printf("[+]'%s' with id '%d' has left the server!\n", client_list[index].name, client_list[index].id);
+        client_list[index].id = -1;
+        memset(client_list[index].name, 0, sizeof(*client_list[index].name));
+        ZeroMemory(&client_list[index].client, sizeof(client_list[index].client));
+        client_list[index].host = -1;
+    }
+}
+
+void *timeoutClient(void *argument){
+    pthread_detach(pthread_self());
+    Argument *arg = (Argument *)argument;
+    client_list[arg->index].time_out = CLIENT_TIMEOUT;
+    do{
+        Sleep(1000);
+        client_list[arg->index].time_out--;
+    }while (client_list[arg->index].time_out > 0);
+    removeClient(arg->index);
+    return NULL;
+}
+
 void* clientHandle(void *argument){
     pthread_detach(pthread_self());
     int i, j = -1;
@@ -207,6 +305,7 @@ void* clientHandle(void *argument){
             buffer = MakeMessage(token, 3, LOGIN_SUCCESS);
             cleanToken(token,3);
             sendToClient(sockfd, arg->client, buffer);
+            pthread_create(&tid_3, NULL, timeoutClient, (void*)arg);
             fclose(pt);
             break; 
         break;
@@ -222,7 +321,7 @@ void* clientHandle(void *argument){
             buffer = MakeMessage(token, 3, LOGIN_SUCCESS);
             cleanToken(token,3);
             sendToClient(sockfd,arg->client,buffer);
-            printf("OK\n");
+            pthread_create(&tid_3, NULL, timeoutClient, (void*)arg);
         }
         else if (arg->index == -1){
             printf("FAIL login!");
@@ -237,11 +336,12 @@ void* clientHandle(void *argument){
     case HOST_GAME:
         token = GetToken(arg->message, 2);   
         printf("%s\n", arg->message);
-        if(checkRoom(token[1]) != 0){
+        if(checkRoom(token[1]) != -1){
             cleanToken(token, 2);
             strcpy(token[1], "Room name already exists!");
             buffer = MakeMessage(token, 1, ERROR_PACK);
             cleanToken(token, 1);
+            printf("Room exist\n");
         }else{
             // printf("id truyen den la %s",token[1]);
             for(i = 0; i < MAX_ROOM; i++){
@@ -323,6 +423,27 @@ void* clientHandle(void *argument){
     }
 
 
+}
+
+void *listenPingServer(){
+    pthread_detach(pthread_self());
+    int i;
+    char *buffer = calloc(10, sizeof(char));
+    struct sockaddr_in client;
+    while(1){
+        memset(buffer, 0, sizeof(*buffer));
+        ZeroMemory(&client, sizeof(client));
+        client = ListenToClient(pingfd, client_addr, buffer);
+        if(strlen(buffer) > 0){
+            for(i = 0; i < MAX_CLIENT; i++){
+                if(atoi(buffer) == client_list[i].id){
+                    client_list[i].time_out = CLIENT_TIMEOUT;
+                    break;
+                }
+            }
+        }
+    }
+    return NULL;
 }
 
 void startServer(){
@@ -434,6 +555,7 @@ int main(){
         room_list[i].isStart = -1;
 	}
 
+    pthread_create(&tid_2, NULL, listenPingServer, NULL);
     if(setupServer() == 1){
         printf("[+]Server is now online!\n");
         startServer();
