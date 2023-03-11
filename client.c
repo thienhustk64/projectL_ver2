@@ -223,7 +223,7 @@ void join_room(int row, Row *roomlist, PlayerInfor *currUser){
     memset(buffer, 0, sizeof(*buffer));
     strcpy(token[0], roomlist[row].roomName);
     printf("token = %s!\n", token[0]);
-    buffer = MakeMessage(token, 2, JOIN_ROOM);
+    buffer = MakeMessage(token, 1, JOIN_ROOM);
     cleanToken(token,1);
     printf ("%s\n", buffer);
     sendToServer(sockfd, server_addr, buffer);
@@ -248,10 +248,60 @@ void join_room(int row, Row *roomlist, PlayerInfor *currUser){
         }    
 }
 
+void start_game(PlayerInfor *currUser){
+    if (currUser->isHost != 1){
+        printf("You are not HOST\n");
+    }
+    else{
+
+        enum mess_type type;
+        char *buffer = calloc(MAX_MESSAGE ,sizeof(char));
+        printf("You are %s , HOST of room %s \n", currUser->name, currUser->room);
+        memset(buffer, 0, sizeof(*buffer));
+        buffer = MakeMessage(token, 0, START_GAME);
+        sendToServer(sockfd, server_addr, buffer);
+        memset(buffer, 0, sizeof(*buffer));
+        free(buffer);
+    }
+}
+
+void in_game(){
+    int dem = 20;
+    enum mess_type type;
+    char *buffer = calloc(MAX_MESSAGE ,sizeof(char));
+    memset(buffer, 0, sizeof(*buffer));
+    char **token = makeToken();
+    ListenToServer(sockfd, server_addr, buffer);
+    printf("%s\n", buffer);
+    memset(buffer, 0, sizeof(*buffer));
+    type = GetType(buffer);
+    if (type == IN_GAME){
+        buffer = MakeMessage(token, 0, IN_GAME);
+        sendToServer(sockfd, server_addr, buffer);
+        
+    }
+    while (dem > 0){
+        dem --;
+        memset(buffer, 0, sizeof(*buffer));
+        strcpy(token[0], "trigger");
+        sprintf(token[1], "%d", dem);
+        buffer = MakeMessage(token, 2, IN_GAME);
+        cleanToken(token, 2);
+        sendToServer(sockfd, server_addr, buffer);
+        memset(buffer, 0, sizeof(*buffer));
+        Sleep(1);
+        ListenToServer(sockfd, server_addr, buffer);
+        printf("Client kia gui %s \n", buffer);
+    }
+    
+    
+}
+
 
 
 void *handleMess(void *argument){
     int choose = 0;
+    int choose_1 = 0;
     int row;
 	pthread_detach(pthread_self());
     int id;
@@ -270,17 +320,26 @@ void *handleMess(void *argument){
             arg->currUser->id = atoi(token[2]);
             currUser->id = arg->currUser->id;
             strcpy(arg->currUser->name, token[3]);
+            pthread_create(&tid1, NULL, sendToPingServer, NULL);
             cleanToken(token, 4);
             printf("chon :\n");
             scanf("%d", &choose);
             if (choose == 1)
             {   printf("ID hien tai la %d\n", currUser->id);
-                pthread_create(&tid1, NULL, sendToPingServer, NULL);
+                // pthread_create(&tid1, NULL, sendToPingServer, NULL);
                 host_game(arg->currUser);
-                break;
+                printf("Chon start: \n");
+                scanf("%d", &choose_1);
+                if (choose_1 == 1)
+                {
+                    start_game(arg->currUser);
+                    in_game(arg->currUser);
+                }
+                
+                // break;
             }else if (choose == 2)
             {   
-                pthread_create(&tid2, NULL, sendToPingServer, NULL);
+                // pthread_create(&tid2, NULL, sendToPingServer, NULL);
                 GetRoomList(roomlist, token);
                 fflush(stdin);
                 printf("Chon join phong: \n");
@@ -289,6 +348,7 @@ void *handleMess(void *argument){
                 {   
                     printf("Row = %d \n", row);
                     join_room(row,  roomlist , arg->currUser);
+                    in_game(arg->currUser);
                 }
             }
             

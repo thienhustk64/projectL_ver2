@@ -401,10 +401,8 @@ void* clientHandle(void *argument){
                 cleanToken(token, 2);
                 strcpy(token[0], "OK");
                 buffer = MakeMessage(token, 1, SUCCEED_PACK);
-                printf("BUFF2 : %s\n", buffer);
                 cleanToken(token, 2);
                 sendToClient(sockfd, client_list[arg->index].client, buffer);
-                printf("Gui OK %s \n", buffer);
                 // for(i = 0; i < client_list[index].room->max_client; i++){
                 //     if(client_list[index].room->player_id[i] != 0){
                 //         GetRoom(client_list[index].room->player_id[i] - 1);
@@ -419,8 +417,57 @@ void* clientHandle(void *argument){
             sendToClient(sockfd, client_list[index].client, buffer);
         }
         break;
+    case START_GAME:
+        token = GetToken(arg->message, 1);
+        printf("Client %s want start game in room %s\n", client_list[arg->index].name, client_list[arg->index].room->room_id);
+        for (i = 0; i < MAX_ROOM; i++){
+            if (strcmp(room_list[i].room_id, client_list[arg->index].room->room_id) == 0){
+                room_list[i].isStart = 1;
+                printf("Room %s in game \n", room_list[i].room_id);
+                break;
+            }    
+        }
+        cleanToken(token, 1);
+        strcpy(token[0], "You are in game");
+        memset(buffer, 0, sizeof(*buffer));
+        buffer = MakeMessage(token, 1, IN_GAME);
+        int a[2];
+        for (i = 0; i < 2; i++){
+            a[i] = client_list[arg->index].room->player_id[i];
+        }
+        
+        for (i = 0; i < 2; i++){
+            printf("Make OK\n");
+            for (int j = 0; j < MAX_CLIENT; j++){
+                if (a[i] == client_list[j].id){
+                printf("Gui cho %s nay\n", client_list[j].name);
+                sendToClient(sockfd, client_list[j].client, buffer);
+                break;
+                }
+            }  
+        } 
+        break;  
+    case IN_GAME:
+        int b[2];
 
+        memset(buffer, 0, sizeof(*buffer));
+        while (1){
+           client_addr = ListenToClient(sockfd, client_addr, buffer); 
+           printf("%s\n", buffer);
+            for (i = 0; i < 2; i++){
+                if (client_list[arg->index].id != client_list[arg->index].room->player_id[i]){
+                    sendToClient(sockfd, client_list[client_list[arg->index].room->player_id[i] - 1].client, buffer);
+                    memset(buffer, 0, sizeof(*buffer));
+                    break;
+                }
+                
+            }
+            
+        }
+        
+        break;     
     }
+
 
 
 }

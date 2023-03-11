@@ -15,6 +15,7 @@ enum mess_type{
     ROLE = 12,
     LOGIN_FAIL = 13,
     LOGIN_SUCCESS = 14,
+    IN_GAME = 15,
     
 };
 
