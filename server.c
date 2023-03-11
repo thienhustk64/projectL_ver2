@@ -448,12 +448,13 @@ void* clientHandle(void *argument){
         } 
         break;  
     case IN_GAME:
-        int b[2];
-
+        printf("INGAME %d : %s", client_list[arg->index].id,  arg->message);
         memset(buffer, 0, sizeof(*buffer));
         while (1){
+            printf("Dang cho \n");
            client_addr = ListenToClient(sockfd, client_addr, buffer); 
            printf("%s\n", buffer);
+           printf("Den day\n");
             for (i = 0; i < 2; i++){
                 if (client_list[arg->index].id != client_list[arg->index].room->player_id[i]){
                     sendToClient(sockfd, client_list[client_list[arg->index].room->player_id[i] - 1].client, buffer);
@@ -467,8 +468,6 @@ void* clientHandle(void *argument){
         
         break;     
     }
-
-
 
 }
 
@@ -503,7 +502,7 @@ void startServer(){
         memset(buffer, 0, sizeof(*buffer));
         ZeroMemory(&client_addr, sizeof(client_addr));
         client_addr = ListenToClient(sockfd, client_addr, buffer);
-        printf("%s\n", buffer);
+        // printf("%s\n", buffer);
         type = GetType(buffer);
         if (type == LOGIN_GAME){
             token = GetToken(buffer, 3);
