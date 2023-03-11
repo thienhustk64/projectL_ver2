@@ -45,10 +45,11 @@ typedef struct Client{
 }Client;
 
 Client *client_list;
-pthread_t tid, tid_2, tid_3;
+pthread_t tid, tid_2, tid_3, tid_4;
 SOCKET sockfd;
 SOCKET pingfd;
-struct sockaddr_in server_addr, client_addr, ping_addr;
+SOCKET gamefd;
+struct sockaddr_in server_addr, client_addr, ping_addr, game_addr;
 Client *client_list;
 Room *room_list;
 char **token;
@@ -68,7 +69,11 @@ int setupServer(){
         printf("[-]Could not create socket : %d\n" , WSAGetLastError());
         return -1;
     }
-
+    if((gamefd = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET){
+        printf("[-]Could not create socket : %d\n" , WSAGetLastError());
+        return -1;
+    }
+    
     ZeroMemory(&server_addr, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -79,12 +84,22 @@ int setupServer(){
 	ping_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	ping_addr.sin_port = htons(5500 + 1);
 
+    ZeroMemory(&game_addr, sizeof(game_addr));
+    game_addr.sin_family = AF_INET;
+	game_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	game_addr.sin_port = htons(5500 + 2);
+
 	if(bind(sockfd ,(SOCKADDR *)&server_addr , sizeof(server_addr)) == SOCKET_ERROR){
 		printf("[-]Bind failed with error code : %d\n" , WSAGetLastError());
 		return -1;
 	}
 
     if(bind(pingfd ,(SOCKADDR *)&ping_addr , sizeof(ping_addr)) == SOCKET_ERROR){
+		printf("[-]Bind failed with error code : %d\n" , WSAGetLastError());
+		return -1;
+	}
+
+    if(bind(gamefd ,(SOCKADDR *)&game_addr , sizeof(game_addr)) == SOCKET_ERROR){
 		printf("[-]Bind failed with error code : %d\n" , WSAGetLastError());
 		return -1;
 	}
@@ -278,6 +293,31 @@ void *timeoutClient(void *argument){
     return NULL;
 }
 
+void *listenInGame(void *argument){
+    pthread_detach(pthread_self());
+    int i;
+    Argument *arg = (Argument *) argument;
+    char *buffer = calloc(10, sizeof(char));
+    struct sockaddr_in client;
+    while(1){
+        memset(buffer, 0, sizeof(*buffer));
+        ZeroMemory(&client, sizeof(client));
+        client = ListenToClient(gamefd, client_addr, buffer);
+        printf("LISTEN %d IN GAME : %s\n", client_list[arg->index].id,buffer);
+        for (i = 0; i < 2; i++){ //kiem tra client gui den la cai nao, sau do gui den client kia
+            if (client_list[arg->index].id != client_list[arg->index].room->player_id[i]){
+                printf("Vao vong if roi , gui den : %d\n", client_list[client_list[arg->index].room->player_id[i] - 1].client.sin_addr.s_addr);
+                sendToClient(gamefd, client_list[client_list[arg->index].room->player_id[i] - 1].client, buffer);
+                // Sleep(1000);
+                printf("ADBSGS\n");
+                memset(buffer, 0, sizeof(*buffer));
+                break;
+            }
+        }
+    }
+    return NULL;
+}
+
 void* clientHandle(void *argument){
     pthread_detach(pthread_self());
     int i, j = -1;
@@ -403,11 +443,6 @@ void* clientHandle(void *argument){
                 buffer = MakeMessage(token, 1, SUCCEED_PACK);
                 cleanToken(token, 2);
                 sendToClient(sockfd, client_list[arg->index].client, buffer);
-                // for(i = 0; i < client_list[index].room->max_client; i++){
-                //     if(client_list[index].room->player_id[i] != 0){
-                //         GetRoom(client_list[index].room->player_id[i] - 1);
-                //     }
-                // }
             }
         }else{
             cleanToken(token, 4);
@@ -448,28 +483,31 @@ void* clientHandle(void *argument){
         } 
         break;  
     case IN_GAME:
-        printf("INGAME %d : %s", client_list[arg->index].id,  arg->message);
-        memset(buffer, 0, sizeof(*buffer));
-        while (1){
-            printf("Dang cho \n");
-           client_addr = ListenToClient(sockfd, client_addr, buffer); 
-           printf("%s\n", buffer);
-           printf("Den day\n");
-            for (i = 0; i < 2; i++){
-                if (client_list[arg->index].id != client_list[arg->index].room->player_id[i]){
-                    sendToClient(sockfd, client_list[client_list[arg->index].room->player_id[i] - 1].client, buffer);
-                    memset(buffer, 0, sizeof(*buffer));
-                    break;
-                }
+        printf("INGAME %d : %s \n", client_list[arg->index].id,  arg->message);
+        pthread_create(&tid_4, NULL, &listenInGame, (void *)arg);
+        // memset(buffer, 0, sizeof(*buffer));
+        // while (1){
+        //     printf("Dang cho \n");
+        //    client_addr = ListenToClient(sockfd, client_addr, buffer); 
+        //    printf("%s\n", buffer);
+        //    printf("Den day\n");
+        //     for (i = 0; i < 2; i++){
+        //         if (client_list[arg->index].id != client_list[arg->index].room->player_id[i]){
+        //             sendToClient(sockfd, client_list[client_list[arg->index].room->player_id[i] - 1].client, buffer);
+        //             memset(buffer, 0, sizeof(*buffer));
+        //             break;
+        //         }
                 
-            }
+        //     }
             
-        }
+        // }
         
         break;     
     }
 
 }
+
+
 
 void *listenPingServer(){
     pthread_detach(pthread_self());
@@ -491,6 +529,8 @@ void *listenPingServer(){
     }
     return NULL;
 }
+
+
 
 void startServer(){
     int i; 

@@ -14,10 +14,12 @@
 #include"message.h"
 #include"define.h"
 
-struct sockaddr_in server_addr; // dia chi server
+struct sockaddr_in server_addr;
+struct sockaddr_in game_addr; // dia chi server
 pthread_t tid1, tid2; // bien tao thread
 pthread_t tid;
 SOCKET sockfd; 
+SOCKET gamefd;
 WSADATA wsa;
 char **token ; // token phuc vu phan tach message
 char *roomName; // ten room cua User hien tai
@@ -64,6 +66,16 @@ int setupClient(){ // Setup client
 		printf("Socket creation failed : %d\n" , WSAGetLastError());
 		return -1;
 	}
+
+    if((gamefd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == SOCKET_ERROR){
+		printf("Socket creation failed : %d\n" , WSAGetLastError());
+		return -1;
+	}
+    
+    memset(&game_addr, 0, sizeof(game_addr));
+    game_addr.sin_family = AF_INET;
+	game_addr.sin_port = htons(5500 + 2);
+	game_addr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
     //Setup address structure
     memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
@@ -264,6 +276,27 @@ void start_game(PlayerInfor *currUser){ //gui tin hieu bat dau game len server
     }
 }
 
+void *sendToInGame(){ // send ping lien tuc den server xac nhan con ket noi
+    // pthread_detach(pthread_self());
+    int dem = 20;
+    char *buffer = calloc(4, sizeof(char));
+    memset(buffer, 0, sizeof(*buffer));
+    char **token = makeToken();
+    strcpy(token[0], "trigger");
+    sprintf(token[1], "%d", currUser->id);
+    buffer = MakeMessage(token, 2, IN_GAME);
+    cleanToken(token, 2);
+    while(1){
+        sendToServer(gamefd, game_addr, buffer);
+        memset(buffer, 0, sizeof(*buffer));
+        Sleep(1000);
+        ListenToServer(gamefd, game_addr, buffer);
+        printf("Client kia gui %s \n", buffer);
+        
+    }
+    return NULL;
+}
+
 void in_game(){ // xu ly in game, dang lam
     int dem = 20;
     enum mess_type type;
@@ -272,29 +305,30 @@ void in_game(){ // xu ly in game, dang lam
     char **token = makeToken();
     ListenToServer(sockfd, server_addr, buffer);
     printf("%s\n", buffer);
-    memset(buffer, 0, sizeof(*buffer));
     type = GetType(buffer);
     if (type == IN_GAME){
+        memset(buffer, 0, sizeof(*buffer));
         buffer = MakeMessage(token, 0, IN_GAME);
         sendToServer(sockfd, server_addr, buffer);
-        
-    }
-    while (dem > 0){
-        dem --;
-        memset(buffer, 0, sizeof(*buffer));
-        strcpy(token[0], "trigger");
-        sprintf(token[1], "%d", dem);
-        buffer = MakeMessage(token, 2, IN_GAME);
-        cleanToken(token, 2);
-        sendToServer(sockfd, server_addr, buffer);
-        memset(buffer, 0, sizeof(*buffer));
+        printf("Gui den SERVER \n");
         Sleep(1);
-        printf("Den day\n");
-        ListenToServer(sockfd, server_addr, buffer);
-        printf("Client kia gui %s \n", buffer);
+        sendToInGame();
     }
     
-    
+    // while (dem > 0){
+    //     dem --;
+    //     memset(buffer, 0, sizeof(*buffer));
+    //     strcpy(token[0], "trigger");
+    //     sprintf(token[1], "%d", dem);
+    //     buffer = MakeMessage(token, 2, IN_GAME);
+    //     cleanToken(token, 2);
+    //     sendToServer(sockfd, server_addr, buffer);
+    //     memset(buffer, 0, sizeof(*buffer));
+    //     Sleep(1);
+    //     printf("Den day\n");
+    //     ListenToServer(sockfd, server_addr, buffer);
+    //     printf("Client kia gui %s \n", buffer);
+    // } 
 }
 
 

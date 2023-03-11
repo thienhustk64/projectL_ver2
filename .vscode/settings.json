@@ -37,6 +37,7 @@
   "files.associations": {
     "*.embeddedhtml": "html",
     "message.h": "c",
-    "time.h": "c"
+    "time.h": "c",
+    "define.h": "c"
   }
 }
