@@ -39,5 +39,13 @@
     "message.h": "c",
     "time.h": "c",
     "define.h": "c"
-  }
+  },
+  "makefile.configurations": [
+    {
+      "makefile.extensionOutputFolder": "./.vscode",
+      "makefile.makePath": "/usr/bin/make",
+      "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+      "name": "Unnamed configuration 1"
+    }
+  ]
 }
