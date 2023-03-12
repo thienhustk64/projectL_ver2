@@ -15,11 +15,13 @@
 #include"define.h"
 
 struct sockaddr_in server_addr;
-struct sockaddr_in game_addr; // dia chi server
+struct sockaddr_in game_addr; 
+struct sockaddr_in game_addr_1; // dia chi server
 pthread_t tid1, tid2; // bien tao thread
 pthread_t tid;
 SOCKET sockfd; 
 SOCKET gamefd;
+SOCKET gamefd_1;
 WSADATA wsa;
 char **token ; // token phuc vu phan tach message
 char *roomName; // ten room cua User hien tai
@@ -71,6 +73,11 @@ int setupClient(){ // Setup client
 		printf("Socket creation failed : %d\n" , WSAGetLastError());
 		return -1;
 	}
+
+    if((gamefd_1 = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == SOCKET_ERROR){
+		printf("Socket creation failed : %d\n" , WSAGetLastError());
+		return -1;
+	}
     
     memset(&game_addr, 0, sizeof(game_addr));
     game_addr.sin_family = AF_INET;
@@ -81,6 +88,11 @@ int setupClient(){ // Setup client
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(5500);
 	server_addr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
+
+    memset(&game_addr_1, 0, sizeof(game_addr_1));
+    game_addr_1.sin_family = AF_INET;
+	game_addr_1.sin_port = htons(5503);
+	game_addr_1.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
     return 1;
 }
 
@@ -170,12 +182,28 @@ void host_game(PlayerInfor *currUser){    // ham tao 1 room
         memset(token, 0, sizeof(*token[0]));;
         printf("Ban dang trong room : %s\n",currUser->room );
         
-        return;
+        
     }else if(type == ERROR_PACK){ // khong tao duoc
          printf("[-]Room's status -> Creating -> %s\n", token[1]);
     }else{
-        return;
+        
     }
+    cleanToken(token, 2);
+    
+    while (1){
+        printf("OK\n");
+        memset(buffer, 0, sizeof(*buffer));
+        ListenToServer(sockfd, server_addr, buffer);
+        token = GetToken(buffer, 3);
+        if (atoi(token[1]) == 2){
+            printf("%s join room, can start game\n", token[2]);
+        } 
+        if (atoi(token[1]) == 1){
+            printf("%s out room\n", token[2]);
+        }
+        
+    }
+    
 }
 
 void GetRoomList( Row *roomlist, char **token){ // Gui yeu cau tim phong len server va nhan lai danh sach phong
@@ -229,10 +257,8 @@ void GetRoomList( Row *roomlist, char **token){ // Gui yeu cau tim phong len ser
 }
 
 void join_room(int row, Row *roomlist, PlayerInfor *currUser){  // tham gia vao 1 room nao do
-    printf("OK\n");
     enum mess_type type;
     char *buffer = calloc(MAX_MESSAGE ,sizeof(char));
-    printf("OK\n");
     printf("row = %d and room = %s and player = %d!\n", row, roomlist[row].roomName, currUser->id); // test 
     memset(buffer, 0, sizeof(*buffer));
     strcpy(token[0], roomlist[row].roomName);
@@ -260,6 +286,15 @@ void join_room(int row, Row *roomlist, PlayerInfor *currUser){  // tham gia vao 
         }    
 }
 
+void exit_room(){
+    char *buffer = calloc(4, sizeof(char));
+    memset(buffer, 0, sizeof(*buffer));
+    makeToken();
+    buffer = MakeMessage(token, 0, EXIT_ROOM);
+    sendToServer(sockfd, server_addr, buffer);
+    free(buffer);
+}
+
 void start_game(PlayerInfor *currUser){ //gui tin hieu bat dau game len server
     if (currUser->isHost != 1){ // chi Host moi start duoc game
         printf("You are not HOST\n");
@@ -281,18 +316,20 @@ void *sendToInGame(){ // send ping lien tuc den server xac nhan con ket noi
     int dem = 20;
     char *buffer = calloc(4, sizeof(char));
     memset(buffer, 0, sizeof(*buffer));
+    char *buffer_1 = calloc(4, sizeof(char));
+    memset(buffer_1, 0, sizeof(*buffer_1));
     char **token = makeToken();
-    strcpy(token[0], "trigger");
-    sprintf(token[1], "%d", currUser->id);
-    buffer = MakeMessage(token, 2, IN_GAME);
-    cleanToken(token, 2);
-    while(1){
+    while(dem > 0){
+        strcpy(token[0], "trigger");
+        sprintf(token[1], "%d", currUser->id);
+        buffer = MakeMessage(token, 2, IN_GAME);
+        cleanToken(token, 2);
         sendToServer(gamefd, game_addr, buffer);
         memset(buffer, 0, sizeof(*buffer));
+        dem --;
         Sleep(1000);
-        ListenToServer(gamefd, game_addr, buffer);
-        printf("Client kia gui %s \n", buffer);
-        
+        ListenToServer(sockfd, game_addr_1, buffer_1);
+        printf("Client kia gui %s \n", buffer_1);  
     }
     return NULL;
 }
@@ -311,8 +348,7 @@ void in_game(){ // xu ly in game, dang lam
         buffer = MakeMessage(token, 0, IN_GAME);
         sendToServer(sockfd, server_addr, buffer);
         printf("Gui den SERVER \n");
-        Sleep(1);
-        sendToInGame();
+        // sendToInGame();
     }
     
     // while (dem > 0){
@@ -377,6 +413,13 @@ void *handleMess(void *argument){
                 {   
                     printf("Row = %d \n", row);
                     join_room(row,  roomlist , arg->currUser);
+                    // fflush(stdin);
+                    // scanf("%d", &choose_1);
+                    // if (choose_1 == 1)
+                    // {
+                    //     exit_room();
+                    // }
+                    
                     in_game(arg->currUser);
                 }
             }

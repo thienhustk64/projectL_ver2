@@ -49,7 +49,8 @@ pthread_t tid, tid_2, tid_3, tid_4;
 SOCKET sockfd;
 SOCKET pingfd;
 SOCKET gamefd;
-struct sockaddr_in server_addr, client_addr, ping_addr, game_addr;
+SOCKET gamefd_1;
+struct sockaddr_in server_addr, client_addr, ping_addr, game_addr, game_addr_1;
 Client *client_list;
 Room *room_list;
 char **token;
@@ -73,6 +74,10 @@ int setupServer(){
         printf("[-]Could not create socket : %d\n" , WSAGetLastError());
         return -1;
     }
+    if((gamefd_1 = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET){
+        printf("[-]Could not create socket : %d\n" , WSAGetLastError());
+        return -1;
+    }
     
     ZeroMemory(&server_addr, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
@@ -89,6 +94,11 @@ int setupServer(){
 	game_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	game_addr.sin_port = htons(5500 + 2);
 
+    ZeroMemory(&game_addr_1, sizeof(game_addr_1));
+    game_addr_1.sin_family = AF_INET;
+	game_addr_1.sin_addr.s_addr = inet_addr("127.0.0.1");
+	game_addr_1.sin_port = htons(5503);
+
 	if(bind(sockfd ,(SOCKADDR *)&server_addr , sizeof(server_addr)) == SOCKET_ERROR){
 		printf("[-]Bind failed with error code : %d\n" , WSAGetLastError());
 		return -1;
@@ -100,6 +110,11 @@ int setupServer(){
 	}
 
     if(bind(gamefd ,(SOCKADDR *)&game_addr , sizeof(game_addr)) == SOCKET_ERROR){
+		printf("[-]Bind failed with error code : %d\n" , WSAGetLastError());
+		return -1;
+	}
+
+    if(bind(gamefd_1 ,(SOCKADDR *)&game_addr_1 , sizeof(game_addr_1)) == SOCKET_ERROR){
 		printf("[-]Bind failed with error code : %d\n" , WSAGetLastError());
 		return -1;
 	}
@@ -229,6 +244,7 @@ void removePlayer(Room *room, int player_id){
     }
 }
 
+
 int checkEmptyRoom(Room *room){
     if(room->client_count == 0){
         printf("[+]Room '%s' has '%d' player(s)!\n", room->room_id, room->client_count);
@@ -260,7 +276,9 @@ void removeClient(int index){
                             sendToClient(sockfd, client_list[client_list[index].room->player_id[i] - 1].client, buffer);
                             client_list[client_list[index].room->player_id[i] - 1].host = 1;
                             printf("[+]Host of room '%s' is set to player '%s' with id '%d'!\n", client_list[index].room->room_id, client_list[client_list[index].room->player_id[i] -1].name, client_list[index].room->player_id[i]);
+                            
                             break;
+
                         }
                     }
                     free(buffer);
@@ -278,6 +296,31 @@ void removeClient(int index){
         memset(client_list[index].name, 0, sizeof(*client_list[index].name));
         ZeroMemory(&client_list[index].client, sizeof(client_list[index].client));
         client_list[index].host = -1;
+    }
+}
+
+void removeHost(int index){
+    int i;
+    if(client_list[index].id != -1){
+        if(client_list[index].room != NULL){
+            removePlayer(client_list[index].room, client_list[index].id);
+            if(checkEmptyRoom(client_list[index].room)){
+                if(client_list[index].host == 1){
+                    printf("[+]Changing host of room '%s'!\n", client_list[index].room->room_id);
+                    char *buffer = calloc(4, sizeof(char));
+                    buffer = MakeMessage(token, 0, HOST_GAME);
+                    for(i = 0; i < client_list[index].room->max_client; i++){
+                        if(client_list[index].room->player_id[i] > 0 && client_list[index].id != client_list[index].room->player_id[i]){
+                            sendToClient(sockfd, client_list[client_list[index].room->player_id[i] - 1].client, buffer);
+                            client_list[client_list[index].room->player_id[i] - 1].host = 1;
+                            printf("[+]Host of room '%s' is set to player '%s' with id '%d'!\n", client_list[index].room->room_id, client_list[client_list[index].room->player_id[i] -1].name, client_list[index].room->player_id[i]);
+                            break;
+                        }
+                    }
+                    free(buffer);
+                }
+            }
+        }
     }
 }
 
@@ -306,16 +349,31 @@ void *listenInGame(void *argument){
         printf("LISTEN %d IN GAME : %s\n", client_list[arg->index].id,buffer);
         for (i = 0; i < 2; i++){ //kiem tra client gui den la cai nao, sau do gui den client kia
             if (client_list[arg->index].id != client_list[arg->index].room->player_id[i]){
-                printf("Vao vong if roi , gui den : %d\n", client_list[client_list[arg->index].room->player_id[i] - 1].client.sin_addr.s_addr);
-                sendToClient(gamefd, client_list[client_list[arg->index].room->player_id[i] - 1].client, buffer);
-                // Sleep(1000);
-                printf("ADBSGS\n");
-                memset(buffer, 0, sizeof(*buffer));
+                printf("Vao vong if roi , gui %s den : %d\n", buffer, client_list[arg->index].room->player_id[i]);
+                sendToClient(gamefd_1, client_list[client_list[arg->index].room->player_id[i] - 1].client, buffer);
+                Sleep(1000);
+                printf("ADBSGS %s\n", buffer);
                 break;
             }
         }
     }
     return NULL;
+}
+
+void GetRoom(int index, int count){
+    int i, j;
+    char *buffer = calloc(MAX_MESSAGE, sizeof(char));
+    sprintf(token[0], "%d",count);
+    sprintf(token[1], "%s",client_list[index].name);
+    buffer = MakeMessage(token, 2, ROOM_INFO);
+    cleanToken(token , 2);
+    for (i = 0; i < 2; i++){
+        if (client_list[client_list[index].room->player_id[i] - 1].host == 1){
+            sendToClient(sockfd, client_list[client_list[index].room->player_id[i] - 1].client, buffer);
+            break;
+        } 
+    }
+    free(buffer);
 }
 
 void* clientHandle(void *argument){
@@ -451,6 +509,7 @@ void* clientHandle(void *argument){
             cleanToken(token, 2);
             sendToClient(sockfd, client_list[index].client, buffer);
         }
+        GetRoom(arg->index, 2);
         break;
     case START_GAME:
         token = GetToken(arg->message, 1);
@@ -502,7 +561,18 @@ void* clientHandle(void *argument){
             
         // }
         
-        break;     
+        break;
+    case EXIT_ROOM:
+        if (client_list[arg->index].host != 1){
+            removePlayer(room_list, client_list[arg->index].id);
+            GetRoom(arg->index, 1);
+        }else{
+            removeHost(arg->index);
+            
+        }
+        
+        
+        break;
     }
 
 }

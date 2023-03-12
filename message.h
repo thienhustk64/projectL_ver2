@@ -16,7 +16,7 @@ enum mess_type{
     LOGIN_FAIL = 13,
     LOGIN_SUCCESS = 14,
     IN_GAME = 15,
-    
+    EXIT_ROOM = 16,
 };
 
 enum rank{
