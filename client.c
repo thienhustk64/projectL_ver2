@@ -295,24 +295,42 @@ void start_game(PlayerInfor *currUser){ //gui tin hieu bat dau game len server
 }
 
 void *sendToInGame(){ // send ping lien tuc den server xac nhan con ket noi
-    // pthread_detach(pthread_self());
-    int dem = 20;
+      int i = 0;
+    int my_hp;
     char *buffer = calloc(4, sizeof(char));
     memset(buffer, 0, sizeof(*buffer));
     char *buffer_1 = calloc(4, sizeof(char));
     memset(buffer_1, 0, sizeof(*buffer_1));
     char **token = makeToken();
     while(1){
-        strcpy(token[0], "trigger");
-        sprintf(token[1], "%d", currUser->id);
-        buffer = MakeMessage(token, 2, IN_GAME);
-        cleanToken(token, 2);
+        sprintf(token[0], "%d", currUser->id);
+        strcpy(token[1], "trigger");
+      
+        if(i ==5 ) sprintf(token[2],"%d",0);
+        else   sprintf(token[2],"%d",19);
+        buffer = MakeMessage(token, 3, IN_GAME);
+        cleanToken(token, 3);
         sendToServer(gamefd, game_addr, buffer);
         memset(buffer, 0, sizeof(*buffer));
-        dem --;
+      
         Sleep(1000);
         ListenToServer(sockfd, server_addr, buffer_1);
-        printf("Client kia gui %s \n", buffer_1);  
+        //trigger - hp 
+        //ingame-id-trigger-hp
+        //if atoi hp <0 ko gui 
+        token = GetToken(buffer_1, 4);
+        if(atoi(token[1]) == currUser->id){
+            my_hp = atoi(token[3]);
+        }
+        if(atoi(token[1]) != currUser->id){ // loai mess gui cho chinh no
+            printf("Client kia gui %s \n", buffer_1);   
+            if(atoi(token[3]) == 0 && my_hp !=0){
+                printf("Ban da thang ");
+                break;
+            }
+        }
+        i++;
+         cleanToken(token, 4);
     }
     return NULL;
 }

@@ -337,7 +337,7 @@ void *timeoutClient(void *argument){
 }
 
 void *listenInGame(void *argument){
-    pthread_detach(pthread_self());
+     pthread_detach(pthread_self());
     int i;
     Argument *arg = (Argument *) argument;
     char *buffer = calloc(10, sizeof(char));
@@ -346,16 +346,27 @@ void *listenInGame(void *argument){
         memset(buffer, 0, sizeof(*buffer));
         ZeroMemory(&client, sizeof(client));
         client = ListenToClient(gamefd, client_addr, buffer);
+
+       
         printf("LISTEN %d IN GAME : %s\n", client_list[arg->index].id,buffer);
         for (i = 0; i < 2; i++){ //kiem tra client gui den la cai nao, sau do gui den client kia
             // if (client_list[arg->index].id != client_list[arg->index].room->player_id[i]){
                 printf("Vao vong if roi , gui %s den : %d\n", buffer, client_list[arg->index].room->player_id[i]);
                 sendToClient(gamefd_1, client_list[client_list[arg->index].room->player_id[i] - 1].client, buffer);
-                // Sleep(100);
+                Sleep(1000);
                 printf("ADBSGS %s\n", buffer);
                 // break;
             // }
         }
+          token = GetToken(buffer, 4);
+       
+            if(atoi(token[3]) == 0){
+                printf("Xong game");
+                break;
+            }
+           
+        
+         cleanToken(token, 4);
     }
     return NULL;
 }
