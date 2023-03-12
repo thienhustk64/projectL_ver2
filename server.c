@@ -268,17 +268,16 @@ void removeClient(int index){
             removePlayer(client_list[index].room, client_list[index].id);
             if(checkEmptyRoom(client_list[index].room)){
                 if(client_list[index].host == 1){
-                    printf("[+]Changing host of room '%s'!\n", client_list[index].room->room_id);
                     char *buffer = calloc(4, sizeof(char));
-                    buffer = MakeMessage(token, 0, HOST_GAME);
-                    for(i = 0; i < client_list[index].room->max_client; i++){
+                    buffer = MakeMessage(token, 0, OUT_ROOM);
+                    for(i = 0; i < 2; i++){
                         if(client_list[index].room->player_id[i] > 0 && client_list[index].id != client_list[index].room->player_id[i]){
                             sendToClient(sockfd, client_list[client_list[index].room->player_id[i] - 1].client, buffer);
-                            client_list[client_list[index].room->player_id[i] - 1].host = 1;
-                            printf("[+]Host of room '%s' is set to player '%s' with id '%d'!\n", client_list[index].room->room_id, client_list[client_list[index].room->player_id[i] -1].name, client_list[index].room->player_id[i]);
-                            
+                            printf("OK %s ID : %d\n", buffer, client_list[index].room->player_id[i] - 1);
+                            removePlayer(client_list[client_list[index].room->player_id[i] - 1].room, client_list[client_list[index].room->player_id[i] - 1].id);
+                            int check = checkEmptyRoom(client_list[index].room);
+                            printf("Check = %d\n", check);
                             break;
-
                         }
                     }
                     free(buffer);
@@ -306,14 +305,15 @@ void removeHost(int index){
             removePlayer(client_list[index].room, client_list[index].id);
             if(checkEmptyRoom(client_list[index].room)){
                 if(client_list[index].host == 1){
-                    printf("[+]Changing host of room '%s'!\n", client_list[index].room->room_id);
                     char *buffer = calloc(4, sizeof(char));
-                    buffer = MakeMessage(token, 0, HOST_GAME);
-                    for(i = 0; i < client_list[index].room->max_client; i++){
+                    buffer = MakeMessage(token, 0, OUT_ROOM);
+                    for(i = 0; i < 2; i++){
                         if(client_list[index].room->player_id[i] > 0 && client_list[index].id != client_list[index].room->player_id[i]){
                             sendToClient(sockfd, client_list[client_list[index].room->player_id[i] - 1].client, buffer);
-                            client_list[client_list[index].room->player_id[i] - 1].host = 1;
-                            printf("[+]Host of room '%s' is set to player '%s' with id '%d'!\n", client_list[index].room->room_id, client_list[client_list[index].room->player_id[i] -1].name, client_list[index].room->player_id[i]);
+                            printf("OK %s ID : %d\n", buffer, client_list[index].room->player_id[i] - 1);
+                            removePlayer(client_list[client_list[index].room->player_id[i] - 1].room, client_list[client_list[index].room->player_id[i] - 1].id);
+                            int check = checkEmptyRoom(client_list[index].room);
+                            printf("Check = %d\n", check);
                             break;
                         }
                     }
@@ -348,13 +348,13 @@ void *listenInGame(void *argument){
         client = ListenToClient(gamefd, client_addr, buffer);
         printf("LISTEN %d IN GAME : %s\n", client_list[arg->index].id,buffer);
         for (i = 0; i < 2; i++){ //kiem tra client gui den la cai nao, sau do gui den client kia
-            if (client_list[arg->index].id != client_list[arg->index].room->player_id[i]){
+            // if (client_list[arg->index].id != client_list[arg->index].room->player_id[i]){
                 printf("Vao vong if roi , gui %s den : %d\n", buffer, client_list[arg->index].room->player_id[i]);
                 sendToClient(gamefd_1, client_list[client_list[arg->index].room->player_id[i] - 1].client, buffer);
-                Sleep(1000);
+                // Sleep(100);
                 printf("ADBSGS %s\n", buffer);
-                break;
-            }
+                // break;
+            // }
         }
     }
     return NULL;

@@ -12,7 +12,7 @@ enum mess_type{
     ERROR_PACK = 9,// tra lai thong bao loi
     START_GAME = 10, // bat dau game dau
     PLAYER_TURN = 11,
-    ROLE = 12,
+    OUT_ROOM = 12,
     LOGIN_FAIL = 13,
     LOGIN_SUCCESS = 14,
     IN_GAME = 15,

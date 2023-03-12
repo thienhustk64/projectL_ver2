@@ -302,7 +302,7 @@ void *sendToInGame(){ // send ping lien tuc den server xac nhan con ket noi
     char *buffer_1 = calloc(4, sizeof(char));
     memset(buffer_1, 0, sizeof(*buffer_1));
     char **token = makeToken();
-    while(dem > 0){
+    while(1){
         strcpy(token[0], "trigger");
         sprintf(token[1], "%d", currUser->id);
         buffer = MakeMessage(token, 2, IN_GAME);
@@ -311,7 +311,7 @@ void *sendToInGame(){ // send ping lien tuc den server xac nhan con ket noi
         memset(buffer, 0, sizeof(*buffer));
         dem --;
         Sleep(1000);
-        ListenToServer(sockfd, game_addr_1, buffer_1);
+        ListenToServer(sockfd, server_addr, buffer_1);
         printf("Client kia gui %s \n", buffer_1);  
     }
     return NULL;
@@ -331,8 +331,12 @@ void in_game(){ // xu ly in game, dang lam
         buffer = MakeMessage(token, 0, IN_GAME);
         sendToServer(sockfd, server_addr, buffer);
         printf("Gui den SERVER \n");
-        // sendToInGame();
+        sendToInGame();
     }
+    else if (type == OUT_ROOM){
+        printf("Ban bi da khoi phong\n");
+    }
+    
     
     // while (dem > 0){
     //     dem --;
@@ -402,7 +406,12 @@ void *handleMess(void *argument){
                         start_game(arg->currUser);
                         in_game(arg->currUser);
                         break;
+                    }else if (choose_1 == 2)
+                    {
+                        exit_room();
+
                     }
+                    
                 }
 
                 
