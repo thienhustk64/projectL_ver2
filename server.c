@@ -497,7 +497,12 @@ void* clientHandle(void *argument){
             if(room_list[j].client_count < 2 && room_list[j].isStart != 1){
                 addPlayer(&room_list[j], arg->index);
                 cleanToken(token, 2);
-                strcpy(token[0], "OK");
+                for (i = 0; i < 2; i++){
+                    if (client_list[room_list[j].player_id[i]-1].host == 1){
+                        strcpy(token[0], client_list[room_list[j].player_id[i]-1].name);
+                        break;
+                    }  
+                }
                 buffer = MakeMessage(token, 1, SUCCEED_PACK);
                 cleanToken(token, 2);
                 sendToClient(sockfd, client_list[arg->index].client, buffer);
@@ -514,32 +519,46 @@ void* clientHandle(void *argument){
     case START_GAME:
         token = GetToken(arg->message, 1);
         printf("Client %s want start game in room %s\n", client_list[arg->index].name, client_list[arg->index].room->room_id);
-        for (i = 0; i < MAX_ROOM; i++){
-            if (strcmp(room_list[i].room_id, client_list[arg->index].room->room_id) == 0){
-                room_list[i].isStart = 1;
-                printf("Room %s in game \n", room_list[i].room_id);
-                break;
-            }    
-        }
-        cleanToken(token, 1);
-        strcpy(token[0], "You are in game");
-        memset(buffer, 0, sizeof(*buffer));
-        buffer = MakeMessage(token, 1, IN_GAME);
-        int a[2];
-        for (i = 0; i < 2; i++){
-            a[i] = client_list[arg->index].room->player_id[i];
-        }
-        
-        for (i = 0; i < 2; i++){
-            printf("Make OK\n");
-            for (int j = 0; j < MAX_CLIENT; j++){
-                if (a[i] == client_list[j].id){
-                printf("Gui cho %s nay\n", client_list[j].name);
-                sendToClient(sockfd, client_list[j].client, buffer);
-                break;
-                }
-            }  
+        if (client_list[arg->index].host == 1){
+            for (i = 0; i < MAX_ROOM; i++){
+                if (strcmp(room_list[i].room_id, client_list[arg->index].room->room_id) == 0){
+                    room_list[i].isStart = 1;
+                    printf("Room %s in game \n", room_list[i].room_id);
+                    break;
+                }    
+            }
+            cleanToken(token, 1);
+            strcpy(token[0], "You are HOST");
+            buffer = MakeMessage(token, 1, IN_GAME);
+            cleanToken(token, 1);
+            sendToClient(sockfd, client_list[arg->index].client, buffer);
+
+            strcpy(token[0], "You are in game");
+            memset(buffer, 0, sizeof(*buffer));
+            buffer = MakeMessage(token, 1, IN_GAME);
+            cleanToken(token, 1);
+            int a[2];
+            for (i = 0; i < 2; i++){
+                a[i] = client_list[arg->index].room->player_id[i];
+            }
+            
+            for (i = 0; i < 2; i++){
+                printf("Make OK\n");
+                for (int j = 0; j < MAX_CLIENT; j++){
+                    if (a[i] == client_list[j].id){
+                    printf("Gui cho %s nay\n", client_list[j].name);
+                    sendToClient(sockfd, client_list[j].client, buffer);
+                    break;
+                    }
+                }  
+            }
         } 
+        else{
+            strcpy(token[0], "You are NOT HOST");
+            buffer = MakeMessage(token, 1, IN_GAME);
+            cleanToken(token, 1);
+            sendToClient(sockfd, client_list[arg->index].client, buffer);
+        }
         break;  
     case IN_GAME:
         printf("INGAME %d : %s \n", client_list[arg->index].id,  arg->message);
@@ -568,7 +587,7 @@ void* clientHandle(void *argument){
             GetRoom(arg->index, 1);
         }else{
             removeHost(arg->index);
-            
+
         }
         
         

@@ -190,20 +190,6 @@ void host_game(PlayerInfor *currUser){    // ham tao 1 room
     }
     cleanToken(token, 2);
     
-    while (1){
-        printf("OK\n");
-        memset(buffer, 0, sizeof(*buffer));
-        ListenToServer(sockfd, server_addr, buffer);
-        token = GetToken(buffer, 3);
-        if (atoi(token[1]) == 2){
-            printf("%s join room, can start game\n", token[2]);
-        } 
-        if (atoi(token[1]) == 1){
-            printf("%s out room\n", token[2]);
-        }
-        
-    }
-    
 }
 
 void GetRoomList( Row *roomlist, char **token){ // Gui yeu cau tim phong len server va nhan lai danh sach phong
@@ -296,10 +282,6 @@ void exit_room(){
 }
 
 void start_game(PlayerInfor *currUser){ //gui tin hieu bat dau game len server
-    if (currUser->isHost != 1){ // chi Host moi start duoc game
-        printf("You are not HOST\n");
-    }
-    else{
         enum mess_type type;
         char *buffer = calloc(MAX_MESSAGE ,sizeof(char));
         printf("You are %s , HOST of room %s \n", currUser->name, currUser->room);
@@ -307,8 +289,9 @@ void start_game(PlayerInfor *currUser){ //gui tin hieu bat dau game len server
         buffer = MakeMessage(token, 0, START_GAME);
         sendToServer(sockfd, server_addr, buffer);
         memset(buffer, 0, sizeof(*buffer));
+        ListenToServer(sockfd, server_addr, buffer);
+        printf("%s\n", buffer);
         free(buffer);
-    }
 }
 
 void *sendToInGame(){ // send ping lien tuc den server xac nhan con ket noi
@@ -373,9 +356,11 @@ void *handleMess(void *argument){
     int choose = 0;
     int choose_1 = 0;
     int row;
+
 	pthread_detach(pthread_self());
     int id;
 	Arg *arg = (Arg *)argument;
+    char *buffer = calloc(MAX_MESSAGE ,sizeof(char));
 	// printf("[+]Server: %s!\n", arg->buffer);
 	 while(1){ 
         memset(arg->buffer, 0, sizeof(*(arg->buffer)));
@@ -397,12 +382,30 @@ void *handleMess(void *argument){
             if (choose == 1)
             {   printf("ID hien tai la %d\n", currUser->id);
                 host_game(arg->currUser);
-                printf("Chon start: \n");
-                scanf("%d", &choose_1);
-                if (choose_1 == 1){
-                    start_game(arg->currUser);
-                    in_game(arg->currUser);
+                
+
+                while (1){
+                    printf("OK\n");
+                    memset(buffer, 0, sizeof(*buffer));
+                    ListenToServer(sockfd, server_addr, buffer);
+                    token = GetToken(buffer, 3);
+                    if (atoi(token[1]) == 2){
+                        printf("%s join room, can start game\n", token[2]);
+                    } 
+                    if (atoi(token[1]) == 1){
+                        printf("%s out room\n", token[2]);
+                    }
+
+                    printf("Chon start: \n");
+                    scanf("%d", &choose_1);
+                    if (choose_1 == 1){
+                        start_game(arg->currUser);
+                        in_game(arg->currUser);
+                        break;
+                    }
                 }
+
+                
             }else if (choose == 2)
             {   
                 GetRoomList(roomlist, token);
